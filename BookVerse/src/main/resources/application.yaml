@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: "jdbc:mysql://localhost:3306/bookstore"
+    username: root
+    password: Vinhdz2004@
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
