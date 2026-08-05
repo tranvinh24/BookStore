@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: "jdbc:mysql://localhost:3306/bookstore"
-    username: root
-    password: Vinhdz2004@
+    url: ${DB_URL:jdbc:mysql://localhost:3306/bookstore}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update

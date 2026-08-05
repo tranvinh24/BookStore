@@ -19,7 +19,7 @@ public class BookController {
     public BookRespone addBook(@Valid @RequestBody BookCreateRequest request){
         return bookService.addBook(request);
     }
-    @GetMapping("api/books")
+    @GetMapping("/api/books")
     public List<BookRespone> getBooks(){
         return bookService.getBooks();
     }
