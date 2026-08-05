@@ -97,3 +97,11 @@ application-local.yaml
 *.swo
 *~
 HELP.md
+
+# ===========================
+# Upload directory
+# ===========================
+# Ignore tất cả ảnh upload, nhưng giữ lại cấu trúc thư mục qua .gitkeep
+uploads/
+!uploads/.gitkeep
+!uploads/covers/.gitkeep

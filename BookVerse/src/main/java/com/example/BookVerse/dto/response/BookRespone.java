@@ -1,4 +1,4 @@
-package com.example.BookVerse.Dto.Respone;
+package com.example.BookVerse.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
