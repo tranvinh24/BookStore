@@ -9,8 +9,13 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookRespone {
-    String id;
-    String name;
-    String author;
-    String genre;
+    private String id;
+    private String title;
+    private String author;
+    private String isbn;
+    private Integer year;
+    private String category;
+    private Double rating;
+    private String description;
+    private String coverPath;
 }
