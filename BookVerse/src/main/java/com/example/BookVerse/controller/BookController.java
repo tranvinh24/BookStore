@@ -32,16 +32,26 @@ public class BookController {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * POST /api/books
-     * Thêm sách mới. Hỗ trợ upload ảnh bìa qua multipart/form-data.
+     * POST /api/books          (Content-Type: application/json)
+     * Thêm sách mới không kèm ảnh bìa — gửi JSON thông thường.
+     */
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public BookRespone addBook(@Valid @RequestBody BookCreateRequest request) {
+        return bookService.addBook(request, null);
+    }
+
+    /**
+     * POST /api/books          (Content-Type: multipart/form-data)
+     * Thêm sách mới kèm upload ảnh bìa.
      *
      * Body (multipart/form-data):
-     *   - data: JSON string chứa thông tin sách (BookCreateRequest)
-     *   - cover: File ảnh (JPG / PNG / WebP) — tùy chọn
+     *   - data : JSON string chứa thông tin sách (BookCreateRequest)
+     *   - cover : File ảnh (JPG / PNG / WebP) — tùy chọn
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public BookRespone addBook(
+    public BookRespone addBookWithCover(
             @Valid @RequestPart("data") BookCreateRequest request,
             @RequestPart(value = "cover", required = false) MultipartFile coverFile) {
         return bookService.addBook(request, coverFile);
@@ -66,15 +76,26 @@ public class BookController {
     }
 
     /**
-     * PUT /api/books/{id}
-     * Cập nhật thông tin sách. Hỗ trợ thay ảnh bìa mới.
+     * PUT /api/books/{id}      (Content-Type: application/json)
+     * Cập nhật thông tin sách không thay ảnh.
+     */
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public BookRespone updateBook(
+            @PathVariable String id,
+            @Valid @RequestBody BookUpdateRequest request) {
+        return bookService.updateBook(id, request, null);
+    }
+
+    /**
+     * PUT /api/books/{id}      (Content-Type: multipart/form-data)
+     * Cập nhật thông tin sách và thay ảnh bìa mới.
      *
      * Body (multipart/form-data):
-     *   - data: JSON string chứa thông tin cần cập nhật (BookUpdateRequest)
-     *   - cover: File ảnh mới — tùy chọn
+     *   - data : JSON string chứa thông tin cập nhật (BookUpdateRequest)
+     *   - cover : File ảnh mới — tùy chọn
      */
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public BookRespone updateBook(
+    public BookRespone updateBookWithCover(
             @PathVariable String id,
             @Valid @RequestPart("data") BookUpdateRequest request,
             @RequestPart(value = "cover", required = false) MultipartFile coverFile) {
