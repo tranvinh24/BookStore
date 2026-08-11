@@ -2,7 +2,7 @@
 
 BookVerse là một hệ thống quản lý sách (RESTful API) được xây dựng bằng **Spring Boot 3** và **Java 21**. Dự án cung cấp các tính năng quản lý thông tin sách, bao gồm việc tải lên và xử lý ảnh bìa (hỗ trợ tự động thay đổi kích thước ảnh - resize).
 
-## 🚀 Công nghệ sử dụng
+## Công nghệ sử dụng
 
 - **Ngôn ngữ:** Java 21
 - **Framework chính:** Spring Boot 3.x (WebMVC, Data JPA, Validation)
@@ -13,7 +13,7 @@ BookVerse là một hệ thống quản lý sách (RESTful API) được xây d�
 - **Xử lý ảnh:** [Thumbnailator](https://github.com/coobird/thumbnailator) (Resize ảnh JPEG/PNG/WebP hiệu quả)
 - **Build tool:** Maven
 
-## ✨ Tính năng nổi bật
+## Tính năng nổi bật
 
 - **Quản lý thông tin sách (CRUD):** Tên sách, tác giả, mã ISBN, năm xuất bản, thể loại, điểm đánh giá và mô tả chi tiết.
 - **Quản lý ảnh bìa:** 
@@ -23,7 +23,7 @@ BookVerse là một hệ thống quản lý sách (RESTful API) được xây d�
   - Tìm kiếm full-text theo tên sách hoặc tác giả.
   - Phân trang, sắp xếp và lọc danh sách sách (theo thể loại, năm xuất bản).
 
-## 📁 Cấu trúc thư mục
+## Cấu trúc thư mục
 
 Thư mục lưu trữ ảnh tải lên được cấu hình trong `application.yaml`:
 - **Thư mục mặc định:** `uploads/covers`
@@ -47,7 +47,7 @@ Thư mục lưu trữ ảnh tải lên được cấu hình trong `application.y
 | ------ | -------- | ----- |
 | `GET` | `/api/books/{id}/cover` | Trả về file ảnh bìa (Thêm param `size=thumbnail|medium|large`) |
 
-## 🛠️ Hướng dẫn cài đặt và chạy dự án
+## Hướng dẫn cài đặt và chạy dự án
 
 ### Yêu cầu hệ thống:
 - JDK 21+
