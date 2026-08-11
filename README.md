@@ -84,5 +84,3 @@ Thư mục lưu trữ ảnh tải lên được cấu hình trong `application.y
 4. **Kiểm tra ứng dụng:**
    - Ứng dụng sẽ khởi chạy tại cổng mặc định: `http://localhost:8080`.
 
-## 📜 Giấy phép
-Dự án được xây dựng cho mục đích học tập và tham khảo.
