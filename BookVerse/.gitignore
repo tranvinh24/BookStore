@@ -1,20 +1,10 @@
-# Module-level gitignore (BookVerse Spring Boot module)
-# Hầu hết các rule đã được cover bởi root .gitignore
-# File này giữ lại để Spring Initializr không ghi đè root rules
-
-# Maven build output
+HELP.md
 target/
-!.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-
-# IntelliJ IDEA
-.idea/
-*.iws
-*.iml
-*.ipr
-
-# Eclipse / STS
+src/main/resources/application.yml
+### STS ###
 .apt_generated
 .classpath
 .factorypath
@@ -23,7 +13,13 @@ target/
 .springBeans
 .sts4-cache
 
-# NetBeans
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -33,15 +29,5 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-# VS Code
+### VS Code ###
 .vscode/
-
-# Logs
-*.log
-
-# Environment files
-.env
-application-local.*
-
-# Spring default template file
-HELP.md

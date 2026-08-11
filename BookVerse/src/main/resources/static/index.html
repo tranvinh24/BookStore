@@ -582,12 +582,22 @@
     const [sort, dir] = document.getElementById('sortSelect').value.split('|');
 
     try {
-      let url;
+      const params = new URLSearchParams({
+        page: page,
+        size: 12,
+        sort: sort,
+        dir: dir
+      });
+      
+      if (category) params.append('category', category);
+      if (year) params.append('year', year);
+      
+      let url = API;
       if (q) {
-        url = `${API}/search?q=${encodeURIComponent(q)}&category=${encodeURIComponent(category)}&page=${page}&size=12&sort=${sort}&dir=${dir}`;
-      } else {
-        url = `${API}?page=${page}&size=12&sort=${sort}&dir=${dir}&category=${encodeURIComponent(category)}${year ? `&year=${year}` : ''}`;
+        url = `${API}/search`;
+        params.append('q', q);
       }
+      url += '?' + params.toString();
 
       const res  = await fetch(url);
       const data = await res.json();
