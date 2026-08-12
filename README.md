@@ -28,7 +28,7 @@ BookVerse là một hệ thống quản lý sách (RESTful API) được xây d�
 Thư mục lưu trữ ảnh tải lên được cấu hình trong `application.yaml`:
 - **Thư mục mặc định:** `uploads/covers`
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### 1. Sách (Books)
 
@@ -64,7 +64,7 @@ Thư mục lưu trữ ảnh tải lên được cấu hình trong `application.y
 
 2. **Cấu hình Cơ sở dữ liệu:**
    - Theo mặc định, ứng dụng dùng biến môi trường để kết nối MySQL: `jdbc:mysql://localhost:3306/bookstore`.
-   - Bạn có thể tùy chỉnh thông qua việc cài đặt các biến môi trường: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`.
+   - Có thể tùy chỉnh thông qua việc cài đặt các biến môi trường: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`.
    - Hoặc chỉnh sửa trực tiếp file `src/main/resources/application.yaml`.
 
 3. **Chạy ứng dụng bằng Maven Wrapper:**
