@@ -18,4 +18,6 @@ public class BookUpdateRequest {
     private Double rating;
     private String description;
     private String coverPath;
+    private Long price;
+    private Integer stock;
 }

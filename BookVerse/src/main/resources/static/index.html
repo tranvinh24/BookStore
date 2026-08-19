@@ -402,6 +402,38 @@
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ── Auth Nav ────────────────────────────────────────────────── */
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .nav-user-name {
+      font-size: .85rem;
+      font-weight: 500;
+      color: var(--text);
+      background: var(--surface2);
+      padding: .35rem .8rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+    .nav-user-name span {
+      color: var(--accent);
+      margin-right: 4px;
+    }
+    .btn-logout {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: .35rem .8rem;
+      font-size: .82rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .2s;
+    }
+    .btn-logout:hover { background: var(--surface2); color: var(--danger); border-color: var(--danger); }
   </style>
 </head>
 <body>
@@ -409,10 +441,8 @@
 <!-- ── Header ──────────────────────────────────────────────────── -->
 <header>
   <div class="logo">📚 BookVerse</div>
-  <div class="header-actions">
-    <button class="btn btn-primary" onclick="openAddModal()">
-      <span>＋</span> Thêm sách
-    </button>
+  <div class="header-actions" id="headerActions">
+    <!-- Render bằng JS dựa trên trạng thái đăng nhập -->
   </div>
 </header>
 
@@ -866,6 +896,57 @@
   function escHtml(str) {
     return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
+
+  // ── Auth helper: gắn JWT vào mọi request ─────────────────────────
+  function getAuthHeaders() {
+    const token = localStorage.getItem('bv_token');
+    return token ? { 'Authorization': 'Bearer ' + token } : {};
+  }
+
+  async function fetchWithAuth(url, options = {}) {
+    options.headers = { ...(options.headers || {}), ...getAuthHeaders() };
+    return fetch(url, options);
+  }
+
+  // ── Auth Nav: render header theo trạng thái đăng nhập ───────────
+  function initAuthNav() {
+    const token    = localStorage.getItem('bv_token');
+    const userName = localStorage.getItem('bv_userName');
+    const role     = localStorage.getItem('bv_role');
+    const nav      = document.getElementById('headerActions');
+
+    if (!token || !userName) {
+      // Chưa đăng nhập
+      nav.innerHTML = `
+        <a href="/login.html"    class="btn btn-ghost btn-sm">Đăng nhập</a>
+        <a href="/register.html" class="btn btn-primary btn-sm">Đăng ký</a>
+      `;
+    } else {
+      // Đã đăng nhập
+      const adminBtn = role === 'ROLE_ADMIN'
+        ? `<button class="btn btn-primary btn-sm" onclick="openAddModal()">＋ Thêm sách</button>`
+        : '';
+      nav.innerHTML = `
+        <div class="nav-user">
+          ${adminBtn}
+          <span class="nav-user-name"><span>👤</span>${escHtml(userName)}</span>
+          <button class="btn-logout" onclick="logout()">Đăng xuất</button>
+        </div>
+      `;
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('bv_token');
+    localStorage.removeItem('bv_userName');
+    localStorage.removeItem('bv_role');
+    localStorage.removeItem('bv_userId');
+    window.location.reload();
+  }
+
+  // Khởi tạo auth nav khi trang load
+  initAuthNav();
+
 </script>
 </body>
 </html>

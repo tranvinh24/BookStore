@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Đăng Ký — BookVerse</title>
+  <meta name="description" content="Tạo tài khoản BookVerse để bắt đầu mua sách, tạo danh sách yêu thích và theo dõi đơn hàng."/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f0f14;
+      --surface:   #1a1a24;
+      --card:      #22222f;
+      --border:    #2e2e3f;
+      --accent:    #7c6bff;
+      --accent2:   #a78bfa;
+      --success:   #22c55e;
+      --danger:    #ef4444;
+      --text:      #e2e8f0;
+      --text-mute: #94a3b8;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image:
+        radial-gradient(ellipse at 80% 50%, rgba(124,107,255,.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 80%, rgba(167,139,250,.10) 0%, transparent 60%);
+    }
+
+    .auth-wrapper {
+      width: 100%;
+      max-width: 460px;
+      padding: 24px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .logo a {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .auth-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    }
+
+    .auth-card h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .auth-card p.subtitle {
+      color: var(--text-mute);
+      font-size: .9rem;
+      margin-bottom: 28px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      font-size: .85rem;
+      font-weight: 500;
+      color: var(--text-mute);
+      margin-bottom: 8px;
+    }
+    .form-group input {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: .95rem;
+      font-family: inherit;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,107,255,.2);
+    }
+    .form-group input::placeholder { color: #475569; }
+    .form-group .hint {
+      font-size: .78rem;
+      color: var(--text-mute);
+      margin-top: 5px;
+    }
+    .form-group .field-error {
+      font-size: .78rem;
+      color: #fca5a5;
+      margin-top: 5px;
+      display: none;
+    }
+    .form-group.invalid input {
+      border-color: var(--danger);
+    }
+    .form-group.invalid .field-error { display: block; }
+
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      margin-top: 8px;
+    }
+    .btn-submit:hover   { opacity: .9; }
+    .btn-submit:active  { transform: scale(.98); }
+    .btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: .875rem;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .alert.error   { background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; }
+    .alert.success { background: rgba(34,197,94,.12);  border: 1px solid rgba(34,197,94,.3);  color: #86efac; }
+    .alert.show    { display: block; }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 24px;
+      color: var(--text-mute);
+      font-size: .875rem;
+    }
+    .auth-footer a {
+      color: var(--accent2);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .auth-footer a:hover { text-decoration: underline; }
+
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+      .auth-card { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="auth-wrapper">
+  <div class="logo">
+    <a href="/index.html">
+      <div class="logo-icon">📚</div>
+      <span class="logo-text">BookVerse</span>
+    </a>
+  </div>
+
+  <div class="auth-card">
+    <h1>Tạo tài khoản</h1>
+    <p class="subtitle">Tham gia BookVerse để khám phá hàng ngàn đầu sách.</p>
+
+    <div id="alertBox" class="alert"></div>
+
+    <form id="registerForm" novalidate>
+      <div class="form-group" id="grp-userName">
+        <label for="userName">Tên đăng nhập <span style="color:#ef4444">*</span></label>
+        <input type="text" id="userName" placeholder="Tối thiểu 3 ký tự"
+               autocomplete="username"/>
+        <div class="field-error" id="err-userName">Tên đăng nhập tối thiểu 3 ký tự.</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" id="grp-password">
+          <label for="password">Mật khẩu <span style="color:#ef4444">*</span></label>
+          <input type="password" id="password" placeholder="Tối thiểu 6 ký tự"
+                 autocomplete="new-password"/>
+          <div class="field-error" id="err-password">Mật khẩu tối thiểu 6 ký tự.</div>
+        </div>
+
+        <div class="form-group" id="grp-confirmPassword">
+          <label for="confirmPassword">Xác nhận mật khẩu <span style="color:#ef4444">*</span></label>
+          <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu"
+                 autocomplete="new-password"/>
+          <div class="field-error" id="err-confirmPassword">Mật khẩu không khớp.</div>
+        </div>
+      </div>
+
+      <div class="form-group" id="grp-email">
+        <label for="email">Email <span style="color:#ef4444">*</span></label>
+        <input type="email" id="email" placeholder="your@email.com"
+               autocomplete="email"/>
+        <div class="field-error" id="err-email">Email không hợp lệ.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="sdt">Số điện thoại</label>
+        <input type="tel" id="sdt" placeholder="0xxxxxxxxx (tùy chọn)"
+               autocomplete="tel"/>
+        <div class="hint">Dùng để liên hệ khi giao hàng.</div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">
+        Đăng ký
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Đã có tài khoản? <a href="/login.html">Đăng nhập</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  if (localStorage.getItem('bv_token')) {
+    window.location.href = '/index.html';
+  }
+
+  const form      = document.getElementById('registerForm');
+  const alertBox  = document.getElementById('alertBox');
+  const submitBtn = document.getElementById('submitBtn');
+
+  function showAlert(msg, type) {
+    alertBox.textContent = msg;
+    alertBox.className   = `alert ${type} show`;
+  }
+
+  function setLoading(loading) {
+    submitBtn.disabled  = loading;
+    submitBtn.innerHTML = loading
+      ? '<span class="spinner"></span>Đang tạo tài khoản...'
+      : 'Đăng ký';
+  }
+
+  function setFieldError(groupId, isError) {
+    document.getElementById(groupId).classList.toggle('invalid', isError);
+  }
+
+  function validate() {
+    let valid = true;
+    const userName        = document.getElementById('userName').value.trim();
+    const password        = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const email           = document.getElementById('email').value.trim();
+
+    setFieldError('grp-userName',        userName.length < 3);
+    setFieldError('grp-password',        password.length < 6);
+    setFieldError('grp-confirmPassword', password !== confirmPassword);
+    setFieldError('grp-email',           !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+
+    if (userName.length < 3)              valid = false;
+    if (password.length < 6)             valid = false;
+    if (password !== confirmPassword)    valid = false;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) valid = false;
+
+    return valid;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    alertBox.className = 'alert';
+
+    if (!validate()) {
+      showAlert('Vui lòng kiểm tra lại thông tin đã nhập.', 'error');
+      return;
+    }
+
+    const userName = document.getElementById('userName').value.trim();
+    const password = document.getElementById('password').value;
+    const email    = document.getElementById('email').value.trim();
+    const sdt      = document.getElementById('sdt').value.trim() || null;
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userName, password, email, sdt })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showAlert(data.message || 'Đăng ký thất bại. Vui lòng thử lại.', 'error');
+        return;
+      }
+
+      localStorage.setItem('bv_token',    data.token);
+      localStorage.setItem('bv_userName', data.userName);
+      localStorage.setItem('bv_role',     data.role);
+      localStorage.setItem('bv_userId',   data.userId);
+
+      showAlert('Đăng ký thành công! Đang chuyển hướng...', 'success');
+      setTimeout(() => { window.location.href = '/index.html'; }, 800);
+
+    } catch (err) {
+      showAlert('Lỗi kết nối. Vui lòng thử lại.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,11 +1,13 @@
 package com.example.BookVerse.service;
 
+import com.example.BookVerse.Mapper.BookMapper;
 import com.example.BookVerse.dto.request.BookCreateRequest;
 import com.example.BookVerse.dto.request.BookUpdateRequest;
 import com.example.BookVerse.dto.response.BookPageResponse;
 import com.example.BookVerse.dto.response.BookRespone;
 import com.example.BookVerse.entity.Book;
-import com.example.BookVerse.Mapper.BookMapper;
+import com.example.BookVerse.exception.AppException;
+import com.example.BookVerse.exception.ErrorCode;
 import com.example.BookVerse.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +18,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -63,8 +63,7 @@ public class BookService {
                 book = bookRepository.save(book);
             } catch (IOException e) {
                 log.error("Lỗi khi xử lý ảnh bìa cho sách id={}: {}", book.getId(), e.getMessage());
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Không thể lưu ảnh bìa: " + e.getMessage());
+                throw new AppException(ErrorCode.FILE_STORAGE_ERROR, "Không thể lưu ảnh bìa: " + e.getMessage());
             }
         }
 
@@ -72,51 +71,41 @@ public class BookService {
     }
 
     /**
-     * Lấy danh sách sách có phân trang, lọc theo category/year, sắp xếp linh hoạt.
-     *
-     * @param page     Số trang (bắt đầu từ 0)
-     * @param size     Số phần tử mỗi trang
-     * @param sortBy   Field sắp xếp: "title", "year", "rating" (mặc định: "title")
-     * @param sortDir  Chiều sắp xếp: "asc" hoặc "desc" (mặc định: "asc")
-     * @param category Lọc theo thể loại (null = tất cả)
-     * @param year     Lọc theo năm xuất bản (null = tất cả)
+     * Lấy thông tin chi tiết một sách theo ID.
      */
-    public BookPageResponse getBooks(int page, int size,
-                                     String sortBy, String sortDir,
-                                     String category, Integer year) {
-        // Xây dựng Sort — chỉ cho phép sắp xếp theo các field hợp lệ
+    public BookRespone getBook(String id) {
+        Book book = findBookOrThrow(id);
+        return bookMapper.toBookRespone(book);
+    }
+
+    /**
+     * Lấy danh sách sách có phân trang, lọc và sắp xếp.
+     */
+    public BookPageResponse getBooks(
+            int page, int size,
+            String sortBy, String sortDir,
+            String category, Integer year) {
+
         Sort sort = buildSort(sortBy, sortDir);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Book> bookPage = bookRepository.findWithFilters(category, year, pageable);
+        String catFilter = (category != null && !category.isBlank()) ? category.trim() : null;
+        Page<Book> bookPage = bookRepository.findWithFilters(catFilter, year, pageable);
+
         return toPageResponse(bookPage);
     }
 
     /**
-     * Lấy thông tin chi tiết một sách theo ID.
+     * Tìm kiếm sách theo từ khóa (tên sách hoặc tác giả) có phân trang.
      */
-    public BookRespone getBook(String id) {
-        return bookMapper.toBookRespone(findBookOrThrow(id));
-    }
+    public BookPageResponse searchBooks(
+            String q, String category,
+            int page, int size,
+            String sortBy, String sortDir) {
 
-    /**
-     * Tìm kiếm full-text theo tên sách và tác giả,
-     * có thể lọc thêm theo category, kết quả có phân trang.
-     *
-     * @param q        Từ khóa tìm kiếm (null = lấy tất cả)
-     * @param category Lọc theo thể loại (null = tất cả)
-     * @param page     Số trang
-     * @param size     Số phần tử mỗi trang
-     * @param sortBy   Field sắp xếp
-     * @param sortDir  Chiều sắp xếp
-     */
-    public BookPageResponse searchBooks(String q, String category,
-                                        int page, int size,
-                                        String sortBy, String sortDir) {
         Sort sort = buildSort(sortBy, sortDir);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        // Nếu q rỗng thì coi như không có từ khóa (query sẽ lấy tất cả)
         String keyword = (q != null && !q.isBlank()) ? q.trim() : null;
         Page<Book> bookPage = bookRepository.searchBooks(keyword, category, pageable);
         return toPageResponse(bookPage);
@@ -137,8 +126,7 @@ public class BookService {
                 book.setCoverPath(newCoverPath);
             } catch (IOException e) {
                 log.error("Lỗi khi cập nhật ảnh bìa cho sách id={}: {}", id, e.getMessage());
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Không thể cập nhật ảnh bìa: " + e.getMessage());
+                throw new AppException(ErrorCode.FILE_STORAGE_ERROR, "Không thể cập nhật ảnh bìa: " + e.getMessage());
             }
         }
 
@@ -170,14 +158,14 @@ public class BookService {
         Book book = findBookOrThrow(id);
 
         if (book.getCoverPath() == null || book.getCoverPath().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sách này chưa có ảnh bìa.");
+            throw new AppException(ErrorCode.FILE_NOT_FOUND, "Sách này chưa có ảnh bìa");
         }
 
         Path imagePath = imageService.resolveImagePath(book.getCoverPath(), size);
         Resource resource = new FileSystemResource(imagePath);
 
         if (!resource.exists()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File ảnh không tồn tại trên server.");
+            throw new AppException(ErrorCode.FILE_NOT_FOUND, "File ảnh không tồn tại trên server");
         }
 
         return ResponseEntity.ok()
@@ -192,8 +180,7 @@ public class BookService {
 
     private Book findBookOrThrow(String id) {
         return bookRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Không tìm thấy sách với id: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND, "Không tìm thấy sách với id: " + id));
     }
 
     /**
@@ -201,7 +188,6 @@ public class BookService {
      * Chỉ cho phép sort theo các field hợp lệ để tránh lỗi query.
      */
     private Sort buildSort(String sortBy, String sortDir) {
-        // Whitelist các field được phép sort
         List<String> allowedFields = List.of("title", "year", "rating", "author");
         String field = allowedFields.contains(sortBy) ? sortBy : "title";
 

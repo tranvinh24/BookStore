@@ -23,3 +23,6 @@ app:
   upload:
     dir: uploads/covers
     allowed-types: image/jpeg,image/png,image/webp,image/gif
+  jwt:
+    secret: ${JWT_SECRET:dGhpcyBpcyBhIHZlcnkgbG9uZyBzZWNyZXQga2V5IGZvciBib29rdmVyc2UgYXBwbGljYXRpb24h}
+    expiration: 86400000   # 24 giờ tính theo milliseconds

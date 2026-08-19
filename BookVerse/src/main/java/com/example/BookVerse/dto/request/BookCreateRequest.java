@@ -37,4 +37,10 @@ public class BookCreateRequest {
     private String description;
     @Size(max = 255)
     private String coverPath;
+    @NotNull(message = "Giá không được để trống")
+    @Min(value = 0, message = "Giá phải >= 0")
+    private Long price;
+    @NotNull(message = "Số lượng không được để trống")
+    @Min(value = 0, message = "Số lượng phải >= 0")
+    private Integer stock;
 }
