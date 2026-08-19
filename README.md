@@ -2,7 +2,7 @@
 
 BookVerse là một hệ thống quản lý sách (RESTful API) được xây dựng bằng **Spring Boot 3** và **Java 21**. Dự án cung cấp các tính năng quản lý thông tin sách, bao gồm việc tải lên và xử lý ảnh bìa (hỗ trợ tự động thay đổi kích thước ảnh - resize).
 
-## 🚀 Công nghệ sử dụng
+## Công nghệ sử dụng
 
 - **Ngôn ngữ:** Java 21
 - **Framework chính:** Spring Boot 3.x (WebMVC, Data JPA, Validation)
@@ -13,7 +13,7 @@ BookVerse là một hệ thống quản lý sách (RESTful API) được xây d�
 - **Xử lý ảnh:** [Thumbnailator](https://github.com/coobird/thumbnailator) (Resize ảnh JPEG/PNG/WebP hiệu quả)
 - **Build tool:** Maven
 
-## ✨ Tính năng nổi bật
+## Tính năng nổi bật
 
 - **Quản lý thông tin sách (CRUD):** Tên sách, tác giả, mã ISBN, năm xuất bản, thể loại, điểm đánh giá và mô tả chi tiết.
 - **Quản lý ảnh bìa:** 
@@ -23,12 +23,12 @@ BookVerse là một hệ thống quản lý sách (RESTful API) được xây d�
   - Tìm kiếm full-text theo tên sách hoặc tác giả.
   - Phân trang, sắp xếp và lọc danh sách sách (theo thể loại, năm xuất bản).
 
-## 📁 Cấu trúc thư mục
+## Cấu trúc thư mục
 
 Thư mục lưu trữ ảnh tải lên được cấu hình trong `application.yaml`:
 - **Thư mục mặc định:** `uploads/covers`
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### 1. Sách (Books)
 
@@ -47,7 +47,7 @@ Thư mục lưu trữ ảnh tải lên được cấu hình trong `application.y
 | ------ | -------- | ----- |
 | `GET` | `/api/books/{id}/cover` | Trả về file ảnh bìa (Thêm param `size=thumbnail|medium|large`) |
 
-## 🛠️ Hướng dẫn cài đặt và chạy dự án
+## Hướng dẫn cài đặt và chạy dự án
 
 ### Yêu cầu hệ thống:
 - JDK 21+
@@ -64,7 +64,7 @@ Thư mục lưu trữ ảnh tải lên được cấu hình trong `application.y
 
 2. **Cấu hình Cơ sở dữ liệu:**
    - Theo mặc định, ứng dụng dùng biến môi trường để kết nối MySQL: `jdbc:mysql://localhost:3306/bookstore`.
-   - Bạn có thể tùy chỉnh thông qua việc cài đặt các biến môi trường: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`.
+   - Có thể tùy chỉnh thông qua việc cài đặt các biến môi trường: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`.
    - Hoặc chỉnh sửa trực tiếp file `src/main/resources/application.yaml`.
 
 3. **Chạy ứng dụng bằng Maven Wrapper:**
@@ -84,5 +84,3 @@ Thư mục lưu trữ ảnh tải lên được cấu hình trong `application.y
 4. **Kiểm tra ứng dụng:**
    - Ứng dụng sẽ khởi chạy tại cổng mặc định: `http://localhost:8080`.
 
-## 📜 Giấy phép
-Dự án được xây dựng cho mục đích học tập và tham khảo.
