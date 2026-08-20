@@ -22,7 +22,23 @@ public enum ErrorCode {
     FILE_NOT_FOUND("FILE_NOT_FOUND", "Không tìm thấy tập tin ảnh", HttpStatus.NOT_FOUND),
     INVALID_FILE_FORMAT("INVALID_FILE_FORMAT", "Định dạng tập tin không được hỗ trợ", HttpStatus.BAD_REQUEST),
     FILE_TOO_LARGE("FILE_TOO_LARGE", "Dung lượng tập tin vượt quá giới hạn", HttpStatus.PAYLOAD_TOO_LARGE),
-    INSUFFICIENT_STOCK("INSUFFICIENT_STOCK", "Số lượng sách trong kho không đủ", HttpStatus.BAD_REQUEST);
+    INSUFFICIENT_STOCK("INSUFFICIENT_STOCK", "Số lượng sách trong kho không đủ", HttpStatus.BAD_REQUEST),
+
+    // Wishlist
+    WISHLIST_ALREADY_EXISTS("WISHLIST_ALREADY_EXISTS", "Sách đã có trong danh sách yêu thích", HttpStatus.CONFLICT),
+    WISHLIST_NOT_FOUND("WISHLIST_NOT_FOUND", "Không tìm thấy sách trong danh sách yêu thích", HttpStatus.NOT_FOUND),
+
+    // Cart
+    CART_NOT_FOUND("CART_NOT_FOUND", "Giỏ hàng không tồn tại", HttpStatus.NOT_FOUND),
+    CART_ITEM_NOT_FOUND("CART_ITEM_NOT_FOUND", "Không tìm thấy sản phẩm trong giỏ hàng", HttpStatus.NOT_FOUND),
+    CART_EMPTY("CART_EMPTY", "Giỏ hàng đang trống, không thể đặt hàng", HttpStatus.BAD_REQUEST),
+
+    // Order
+    ORDER_NOT_FOUND("ORDER_NOT_FOUND", "Không tìm thấy đơn hàng", HttpStatus.NOT_FOUND),
+
+    // Payment
+    PAYMENT_NOT_FOUND("PAYMENT_NOT_FOUND", "Không tìm thấy thông tin thanh toán", HttpStatus.NOT_FOUND),
+    PAYMENT_ALREADY_PROCESSED("PAYMENT_ALREADY_PROCESSED", "Đơn hàng đã được thanh toán", HttpStatus.CONFLICT);
 
     private final String code;
     private final String message;

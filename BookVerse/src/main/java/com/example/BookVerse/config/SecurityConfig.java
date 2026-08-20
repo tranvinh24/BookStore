@@ -75,6 +75,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT,    "/api/books", "/api/books/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/books", "/api/books/**").hasRole("ADMIN")
 
+                // Phase 2: USER endpoints — Wishlist, Cart, Order, Payment
+                .requestMatchers("/api/wishlist", "/api/wishlist/**").hasRole("USER")
+                .requestMatchers("/api/cart", "/api/cart/**").hasRole("USER")
+                .requestMatchers("/api/orders", "/api/orders/**").hasRole("USER")
+                .requestMatchers("/api/payments", "/api/payments/**").hasRole("USER")
+
                 // Còn lại: phải đăng nhập
                 .anyRequest().authenticated()
             )
