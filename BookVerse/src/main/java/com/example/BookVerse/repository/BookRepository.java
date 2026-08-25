@@ -6,46 +6,53 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.List;
 
 public interface BookRepository extends JpaRepository<Book, String> {
 
     /**
-     * Tìm kiếm full-text theo title hoặc author (không phân biệt hoa thường),
-     * có thể lọc thêm theo category (null = lấy tất cả).
-     *
-     * @param q        Từ khóa tìm kiếm
-     * @param category Thể loại cần lọc, null = không lọc
-     * @param pageable Thông tin phân trang và sắp xếp
+     * Tim kiem nang cao: keyword (title/author/isbn), category, khoang gia, nam xb.
+     * Tat ca tham so co the null — khi null thi bo qua dieu kien do.
      */
     @Query("""
         SELECT b FROM Book b
         WHERE (:q IS NULL OR
                LOWER(b.title)  LIKE LOWER(CONCAT('%', :q, '%')) OR
-               LOWER(b.author) LIKE LOWER(CONCAT('%', :q, '%')))
+               LOWER(b.author) LIKE LOWER(CONCAT('%', :q, '%')) OR
+               LOWER(b.isbn)   LIKE LOWER(CONCAT('%', :q, '%')))
           AND (:category IS NULL OR LOWER(b.category) = LOWER(:category))
+          AND (:minPrice IS NULL OR b.price >= :minPrice)
+          AND (:maxPrice IS NULL OR b.price <= :maxPrice)
+          AND (:year IS NULL OR b.year = :year)
         """)
     Page<Book> searchBooks(
-            @Param("q")        String q,
-            @Param("category") String category,
+            @Param("q")        String  q,
+            @Param("category") String  category,
+            @Param("minPrice") Long    minPrice,
+            @Param("maxPrice") Long    maxPrice,
+            @Param("year")     Integer year,
             Pageable pageable
     );
 
     /**
-     * Lấy danh sách sách có lọc theo category và/hoặc year.
-     * Null = bỏ qua điều kiện đó.
-     *
-     * @param category Thể loại, null = tất cả
-     * @param year     Năm xuất bản, null = tất cả
-     * @param pageable Thông tin phân trang và sắp xếp
+     * Lay danh sach sach co loc theo category va/hoac year.
      */
     @Query("""
         SELECT b FROM Book b
         WHERE (:category IS NULL OR LOWER(b.category) = LOWER(:category))
           AND (:year     IS NULL OR b.year = :year)
+          AND (:minPrice IS NULL OR b.price >= :minPrice)
+          AND (:maxPrice IS NULL OR b.price <= :maxPrice)
         """)
     Page<Book> findWithFilters(
-            @Param("category") String category,
+            @Param("category") String  category,
             @Param("year")     Integer year,
+            @Param("minPrice") Long    minPrice,
+            @Param("maxPrice") Long    maxPrice,
             Pageable pageable
     );
+
+    /** Lay tat ca cac category duy nhat de hien thi bo loc */
+    @Query("SELECT DISTINCT b.category FROM Book b WHERE b.category IS NOT NULL ORDER BY b.category")
+    List<String> findAllCategories();
 }

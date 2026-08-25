@@ -84,15 +84,21 @@ public class BookService {
     public BookPageResponse getBooks(
             int page, int size,
             String sortBy, String sortDir,
-            String category, Integer year) {
+            String category, Integer year,
+            Long minPrice, Long maxPrice) {
 
         Sort sort = buildSort(sortBy, sortDir);
         Pageable pageable = PageRequest.of(page, size, sort);
 
         String catFilter = (category != null && !category.isBlank()) ? category.trim() : null;
-        Page<Book> bookPage = bookRepository.findWithFilters(catFilter, year, pageable);
+        Page<Book> bookPage = bookRepository.findWithFilters(catFilter, year, minPrice, maxPrice, pageable);
 
         return toPageResponse(bookPage);
+    }
+
+    /** Lấy danh sách tất cả thể loại sách có trong hệ thống */
+    public List<String> getCategories() {
+        return bookRepository.findAllCategories();
     }
 
     /**
@@ -100,6 +106,8 @@ public class BookService {
      */
     public BookPageResponse searchBooks(
             String q, String category,
+            Long minPrice, Long maxPrice,
+            Integer year,
             int page, int size,
             String sortBy, String sortDir) {
 
@@ -107,7 +115,8 @@ public class BookService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         String keyword = (q != null && !q.isBlank()) ? q.trim() : null;
-        Page<Book> bookPage = bookRepository.searchBooks(keyword, category, pageable);
+        String catFilter = (category != null && !category.isBlank()) ? category.trim() : null;
+        Page<Book> bookPage = bookRepository.searchBooks(keyword, catFilter, minPrice, maxPrice, year, pageable);
         return toPageResponse(bookPage);
     }
 

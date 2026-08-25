@@ -35,10 +35,14 @@ public enum ErrorCode {
 
     // Order
     ORDER_NOT_FOUND("ORDER_NOT_FOUND", "Không tìm thấy đơn hàng", HttpStatus.NOT_FOUND),
+    INVALID_ORDER_STATUS_TRANSITION("INVALID_ORDER_STATUS_TRANSITION", "Chuyển trạng thái đơn hàng không hợp lệ", HttpStatus.BAD_REQUEST),
 
     // Payment
     PAYMENT_NOT_FOUND("PAYMENT_NOT_FOUND", "Không tìm thấy thông tin thanh toán", HttpStatus.NOT_FOUND),
-    PAYMENT_ALREADY_PROCESSED("PAYMENT_ALREADY_PROCESSED", "Đơn hàng đã được thanh toán", HttpStatus.CONFLICT);
+    PAYMENT_ALREADY_PROCESSED("PAYMENT_ALREADY_PROCESSED", "Đơn hàng đã được thanh toán", HttpStatus.CONFLICT),
+
+    // Profile
+    CURRENT_PASSWORD_REQUIRED("CURRENT_PASSWORD_REQUIRED", "Vui lòng nhập mật khẩu hiện tại để đổi mật khẩu mới", HttpStatus.BAD_REQUEST);
 
     private final String code;
     private final String message;

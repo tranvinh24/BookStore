@@ -46,8 +46,10 @@ public class BookController {
             @RequestParam(defaultValue = "title") String  sort,
             @RequestParam(defaultValue = "asc")   String  dir,
             @RequestParam(required = false)        String  category,
-            @RequestParam(required = false)        Integer year) {
-        return bookService.getBooks(page, size, sort, dir, category, year);
+            @RequestParam(required = false)        Integer year,
+            @RequestParam(required = false)        Long    minPrice,
+            @RequestParam(required = false)        Long    maxPrice) {
+        return bookService.getBooks(page, size, sort, dir, category, year, minPrice, maxPrice);
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -68,11 +70,23 @@ public class BookController {
     public BookPageResponse searchBooks(
             @RequestParam(required = false)        String  q,
             @RequestParam(required = false)        String  category,
+            @RequestParam(required = false)        Long    minPrice,
+            @RequestParam(required = false)        Long    maxPrice,
+            @RequestParam(required = false)        Integer year,
             @RequestParam(defaultValue = "0")     int     page,
             @RequestParam(defaultValue = "10")    int     size,
             @RequestParam(defaultValue = "title") String  sort,
             @RequestParam(defaultValue = "asc")   String  dir) {
-        return bookService.searchBooks(q, category, page, size, sort, dir);
+        return bookService.searchBooks(q, category, minPrice, maxPrice, year, page, size, sort, dir);
+    }
+
+    /**
+     * GET /api/books/categories
+     * Lấy danh sách tất cả thể loại sách (dùng cho bộ lọc frontend).
+     */
+    @GetMapping("/categories")
+    public java.util.List<String> getCategories() {
+        return bookService.getCategories();
     }
 
     // ─────────────────────────────────────────────────────────────

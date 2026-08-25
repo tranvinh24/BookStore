@@ -81,6 +81,12 @@ public class SecurityConfig {
                 .requestMatchers("/api/orders", "/api/orders/**").hasRole("USER")
                 .requestMatchers("/api/payments", "/api/payments/**").hasRole("USER")
 
+                // Phase 3: ADMIN endpoints
+                .requestMatchers("/api/admin", "/api/admin/**").hasRole("ADMIN")
+
+                // Phase 4: Profile — bất kỳ user đã đăng nhập
+                .requestMatchers("/api/profile", "/api/profile/**").authenticated()
+
                 // Còn lại: phải đăng nhập
                 .anyRequest().authenticated()
             )
