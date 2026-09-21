@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý đơn hàng — Góc Của Vin Admin</title>
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="header"></header>
+
+  <main class="main-content">
+    <div class="container">
+      
+      <div style="text-align: center; margin: 1.75rem 0 2rem 0;">
+        <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; margin: 0;">Quản lý toàn bộ đơn hàng</h1>
+      </div>
+
+      <div class="admin-layout">
+        
+        <aside class="admin-sidebar">
+          <a href="/admin/dashboard.html" class="admin-nav-item">Tổng quan</a>
+          <a href="/admin/books.html" class="admin-nav-item">Quản lý sách & Kho</a>
+          <a href="/admin/orders.html" class="admin-nav-item active">Quản lý đơn hàng</a>
+          <a href="/admin/users.html" class="admin-nav-item">Quản lý người dùng</a>
+          <div class="dropdown-divider" style="margin: 1rem 0;"></div>
+          <a href="/index.html" class="admin-nav-item">Xem trang bán hàng</a>
+        </aside>
+
+        <section>
+          
+          <!-- Filter Tabs -->
+          <div class="panel" style="margin-bottom: 1.5rem; padding: 1rem;">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" id="order-status-filter-tabs">
+              <button class="btn btn-secondary btn-sm active" data-status="">Tất cả đơn</button>
+              <button class="btn btn-outline btn-sm" data-status="PENDING">Chờ thanh toán</button>
+              <button class="btn btn-outline btn-sm" data-status="PAID">Đã thanh toán</button>
+              <button class="btn btn-outline btn-sm" data-status="PROCESSING">Đang đóng gói</button>
+              <button class="btn btn-outline btn-sm" data-status="SHIPPING">Đang giao hàng</button>
+              <button class="btn btn-outline btn-sm" data-status="DELIVERED">Đã giao</button>
+              <button class="btn btn-outline btn-sm" data-status="CANCELLED">Đã hủy</button>
+            </div>
+          </div>
+
+          <!-- Orders Table -->
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Mã đơn</th>
+                  <th>Khách hàng</th>
+                  <th>Địa chỉ & Vận chuyển</th>
+                  <th>Tổng tiền</th>
+                  <th>Trạng thái</th>
+                  <th>Ngày tạo</th>
+                  <th style="text-align: right;">Hành động</th>
+                </tr>
+              </thead>
+              <tbody id="orders-table-body">
+                <tr><td colspan="7" style="text-align: center; padding: 2rem;">Đang tải danh sách đơn hàng...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Update Status Modal -->
+  <div id="status-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 480px;">
+      <div class="panel-header">
+        <h3>Cập nhật trạng thái đơn hàng</h3>
+        <button id="btn-close-status-modal" class="btn btn-outline btn-sm btn-icon">✕</button>
+      </div>
+
+      <form id="status-form">
+        <input type="hidden" id="status-order-id" />
+
+        <div style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--ink-secondary);">
+          Mã đơn: <strong id="status-order-id-label" class="font-number" style="color: var(--ink);">-</strong>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="select-next-status">Trạng thái mới <span class="required">*</span></label>
+          <select id="select-next-status" class="field-select" required>
+            <option value="PAID">Đã thanh toán (PAID)</option>
+            <option value="PROCESSING">Đang chuẩn bị hàng (PROCESSING)</option>
+            <option value="SHIPPING">Đang giao hàng (SHIPPING)</option>
+            <option value="DELIVERED">Giao thành công (DELIVERED)</option>
+            <option value="CANCELLED">Hủy đơn hàng (CANCELLED)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="input-tracking-note">Ghi chú vận chuyển / Mã vận đơn</label>
+          <input type="text" id="input-tracking-note" class="field-input" placeholder="Ví dụ: Mã vận đơn VNPost 123456" />
+          <div class="field-hint">Khách hàng sẽ nhìn thấy ghi chú này trong trang theo dõi đơn.</div>
+        </div>
+
+        <div id="status-modal-error" class="field-error" style="margin-bottom: 1rem;"></div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+          <button type="button" id="btn-cancel-status-modal" class="btn btn-outline">Hủy</button>
+          <button type="submit" id="btn-submit-status" class="btn btn-primary">Cập nhật</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <span>© 2026 Góc Của Vin Admin Portal.</span>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/admin-orders.js"></script>
+</body>
+</html>

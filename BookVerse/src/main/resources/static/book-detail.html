@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chi tiết sách — Góc Của Vin</title>
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+    .cover-box {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      text-align: center;
+      position: sticky;
+      top: 90px;
+      box-shadow: var(--shadow-sm);
+    }
+    .cover-img-wrap {
+      max-height: 480px;
+      overflow: hidden;
+      border-radius: var(--radius-sm);
+      margin: 0 auto;
+      background: #F9FAFB;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cover-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .price-box {
+      background: #FFF1F0;
+      border: 1px solid #FFA39E;
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: baseline;
+      gap: 1.25rem;
+    }
+    .qty-picker {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: #FFFFFF;
+    }
+    .qty-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+    }
+    .qty-btn:hover { background: var(--bg-page); }
+    .qty-input {
+      width: 48px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      text-align: center;
+      font-family: var(--font-number);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text-main);
+    }
+    .tab-btn {
+      padding: 0.75rem 1.5rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-secondary);
+      border-bottom: 3px solid transparent;
+    }
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    /* Reviews Section Styles */
+    .star-rating-input {
+      display: inline-flex;
+      flex-direction: row-reverse;
+      gap: 0.25rem;
+      font-size: 1.7rem;
+      line-height: 1;
+    }
+    .star-rating-input input {
+      display: none;
+    }
+    .star-rating-input label {
+      color: #D1D5DB;
+      cursor: pointer;
+      transition: color 0.15s ease, transform 0.15s ease;
+    }
+    .star-rating-input label:hover,
+    .star-rating-input label:hover ~ label,
+    .star-rating-input input:checked ~ label {
+      color: #F59E0B;
+    }
+    .star-rating-input label:hover {
+      transform: scale(1.15);
+    }
+    .gold-stars {
+      color: #F59E0B;
+      letter-spacing: 2px;
+      font-size: 1.05rem;
+    }
+    .review-item {
+      padding: 1.25rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .review-item:last-child {
+      border-bottom: none;
+    }
+    @media (max-width: 860px) {
+      .detail-grid { grid-template-columns: 1fr; }
+      .cover-box { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header"></header>
+
+  <main class="main-content">
+    <div class="container">
+      
+      <!-- Breadcrumb -->
+      <div style="margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+        <a href="/index.html">Trang chủ</a>
+        <span style="margin: 0 0.4rem;">/</span>
+        <span id="crumb-category">Sách</span>
+        <span style="margin: 0 0.4rem;">/</span>
+        <span id="crumb-title" style="color: var(--text-main); font-weight: 600;">Chi tiết</span>
+      </div>
+
+      <!-- Loading State -->
+      <div id="detail-loading" class="panel" style="text-align: center; padding: 4rem 2rem;">
+        <p>Đang tải thông tin cuốn sách...</p>
+      </div>
+
+      <!-- Error State -->
+      <div id="detail-error" class="panel" style="display: none; text-align: center; padding: 4rem 2rem;">
+        <h3>Không tìm thấy cuốn sách này</h3>
+        <p style="margin-top: 0.4rem; color: var(--text-secondary);">Cuốn sách có thể đã bị xóa hoặc đường dẫn không tồn tại.</p>
+        <a href="/index.html" class="btn btn-primary" style="margin-top: 1.25rem;">Quay về trang chủ</a>
+      </div>
+
+      <!-- Main Detail View -->
+      <div id="detail-content" class="detail-grid" style="display: none;">
+        
+        <!-- Left: Book Cover -->
+        <div class="cover-box">
+          <div class="cover-img-wrap">
+            <img id="book-cover-img" src="" alt="Bìa sách" />
+          </div>
+
+          <div style="margin-top: 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; text-align: left; font-size: 0.82rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary);">
+              <span style="color: var(--success); font-weight: bold;">✓</span>
+              <span>100% Sách thật bản quyền từ NXB</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary);">
+              <span style="color: var(--success); font-weight: bold;">✓</span>
+              <span>Miễn phí đổi trả trong 7 ngày</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary);">
+              <span style="color: var(--success); font-weight: bold;">✓</span>
+              <span>Kiểm tra hàng trước khi thanh toán</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Information & Purchase -->
+        <div>
+          <div class="panel" style="margin-bottom: 1.75rem;">
+            
+            <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+              <span id="book-category-ribbon" class="ribbon ribbon-blue">Thể loại</span>
+              <span id="book-stock-ribbon" class="ribbon ribbon-green">Còn hàng</span>
+            </div>
+
+            <h1 id="book-title" style="font-size: 1.75rem; margin-bottom: 0.4rem; color: #1F2937;">
+              Tên cuốn sách
+            </h1>
+
+            <div style="display: flex; gap: 1.5rem; align-items: center; margin-bottom: 1.25rem; font-size: 0.88rem; color: var(--text-secondary); flex-wrap: wrap;">
+              <div>Tác giả: <strong id="book-author" style="color: var(--primary);">Tác giả</strong></div>
+              <div>Năm xuất bản: <strong id="book-year" class="font-number">-</strong></div>
+              <div style="display: flex; align-items: center; gap: 0.25rem; color: var(--gold); font-weight: 700;">
+                ★ <span id="book-rating">5.0</span>
+              </div>
+            </div>
+
+            <!-- Price Box -->
+            <div class="price-box">
+              <div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Giá niêm yết chính hãng</div>
+                <div id="book-price" class="font-number" style="font-size: 2.2rem; font-weight: 800; color: var(--primary); line-height: 1.1; margin-top: 0.15rem;">
+                  0 đ
+                </div>
+              </div>
+              <div style="margin-left: auto; text-align: right;">
+                <div style="font-size: 0.78rem; color: var(--text-muted);">Tình trạng kho:</div>
+                <strong id="book-stock-count" class="font-number" style="font-size: 1.1rem; color: var(--text-main);">0 cuốn</strong>
+              </div>
+            </div>
+
+            <!-- Purchase Controls -->
+            <div id="purchase-controls" style="margin-bottom: 1.5rem;">
+              <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
+                <span style="font-weight: 600; font-size: 0.9rem;">Số lượng:</span>
+                <div class="qty-picker">
+                  <button id="btn-qty-minus" class="qty-btn">-</button>
+                  <input type="number" id="qty-input" class="qty-input" value="1" min="1" />
+                  <button id="btn-qty-plus" class="qty-btn">+</button>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button id="btn-add-to-cart" class="btn btn-outline btn-lg" style="flex: 1; min-width: 180px; font-weight: 700;">
+                  Thêm vào giỏ hàng
+                </button>
+                <button id="btn-buy-now" class="btn btn-primary btn-lg" style="flex: 1; min-width: 180px; font-weight: 700;">
+                  Mua ngay
+                </button>
+                <button id="btn-wishlist-toggle" class="btn btn-outline btn-icon btn-lg" title="Lưu sách yêu thích" style="width: 48px; height: 48px;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Specifications Table -->
+            <div style="background: #F9FAFB; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.25rem; font-size: 0.88rem;">
+              <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.5rem;">
+                <span style="color: var(--text-muted);">Mã ISBN-13:</span>
+                <strong id="book-isbn" class="font-number">-</strong>
+                
+                <span style="color: var(--text-muted);">Thể loại:</span>
+                <span id="book-category-text">-</span>
+
+                <span style="color: var(--text-muted);">Hình thức bìa:</span>
+                <span>Bìa mềm / Bìa gập cao cấp</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Description Panel -->
+          <div class="panel" style="margin-bottom: 1.75rem;">
+            <div style="border-bottom: 2px solid var(--border-subtle); margin-bottom: 1.25rem; display: flex;">
+              <button class="tab-btn active">GIỚI THIỆU NỘI DUNG SÁCH</button>
+            </div>
+            <div id="book-description" style="line-height: 1.8; color: var(--text-secondary); white-space: pre-line; font-size: 0.95rem;">
+              Không có mô tả cho tác phẩm này.
+            </div>
+          </div>
+
+          <!-- Reviews & Ratings Panel -->
+          <div class="panel" id="reviews-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-subtle); padding-bottom: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+              <h3 style="font-size: 1.25rem; margin: 0; color: #1F2937;">
+                💬 Đánh giá & Bình luận từ độc giả
+              </h3>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span id="review-summary-stars" class="gold-stars" style="font-size: 1.2rem;">★★★★★</span>
+                <strong id="review-summary-avg" class="font-number" style="font-size: 1.15rem; color: #1F2937;">5.0</strong>
+                <span id="review-summary-count" style="font-size: 0.88rem; color: var(--text-muted);">(0 đánh giá)</span>
+              </div>
+            </div>
+
+            <!-- Review Input Form (When Logged In) -->
+            <div id="review-form-container" style="background: #F9FAFB; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; margin-bottom: 1.75rem; display: none;">
+              <h4 style="margin-top: 0; margin-bottom: 0.75rem; font-size: 1rem; color: var(--text-main);">Viết nhận xét của bạn</h4>
+              <form id="review-form">
+                <div style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">
+                  <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">Chấm điểm sao:</span>
+                  <div class="star-rating-input">
+                    <input type="radio" id="star5" name="rating" value="5" checked /><label for="star5" title="5 sao">★</label>
+                    <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 sao">★</label>
+                    <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 sao">★</label>
+                    <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 sao">★</label>
+                    <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 sao">★</label>
+                  </div>
+                  <span id="selected-star-text" style="font-size: 0.88rem; font-weight: 600; color: #D97706;">5 sao (Tuyệt vời)</span>
+                </div>
+
+                <div class="field" style="margin-bottom: 0.75rem;">
+                  <textarea id="review-comment-input" class="field-textarea" rows="3" placeholder="Chia sẻ cảm nhận của bạn về cuốn sách này..." required></textarea>
+                  <div id="review-error-msg" class="field-error"></div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end;">
+                  <button type="submit" id="btn-submit-review" class="btn btn-primary" style="font-weight: 600;">
+                    Gửi bình luận & Đánh giá
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Login Prompt for Guests -->
+            <div id="review-login-prompt" style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin-bottom: 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+              <div style="color: #166534; font-size: 0.92rem;">
+                ✍️ Bạn đã đọc cuốn sách này? Hãy <strong>đăng nhập</strong> để chia sẻ đánh giá và cảm nhận của bạn.
+              </div>
+              <button id="btn-review-login" class="btn btn-primary btn-sm" style="font-weight: 600;">
+                Đăng nhập ngay
+              </button>
+            </div>
+
+            <!-- Reviews List -->
+            <div id="reviews-list-container">
+              <div id="reviews-loading" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                Đang tải bình luận...
+              </div>
+              <div id="reviews-empty" style="display: none; text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); background: #F9FAFB; border-radius: var(--radius-sm);">
+                <div style="font-size: 2rem; margin-bottom: 0.4rem;">📖</div>
+                <div style="font-weight: 500;">Chưa có bình luận nào cho cuốn sách này.</div>
+                <div style="font-size: 0.82rem; margin-top: 0.2rem;">Hãy là người đầu tiên để lại cảm nhận của bạn!</div>
+              </div>
+              <div id="reviews-list"></div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <span>© 2026 Góc Của Vin. Nhà sách trực tuyến chính hãng.</span>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/book-detail.js"></script>
+</body>
+</html>

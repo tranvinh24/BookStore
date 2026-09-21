@@ -87,6 +87,8 @@ public class AuthService {
         return AuthResponse.builder()
                 .token(token)
                 .userName(user.getUsername())
+                .fullName(user.getFullName())
+                .avatarPath(user.getAvatarPath())
                 .role("ROLE_" + user.getRole().name())
                 .userId(user.getId())
                 .build();

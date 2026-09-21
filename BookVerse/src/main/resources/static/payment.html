@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cổng thanh toán — Góc Của Vin</title>
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .payment-card-box {
+      max-width: 520px;
+      margin: 2rem auto;
+    }
+    .qr-box {
+      background: #FFFFFF;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: inline-block;
+      margin: 1.25rem 0;
+      box-shadow: var(--shadow-sm);
+    }
+  </style>
+</head>
+<body>
+  <header class="header"></header>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="payment-card-box">
+        
+        <div id="payment-loading" class="panel" style="text-align: center; padding: 3rem;">
+          <p>Đang chuẩn bị cổng thanh toán...</p>
+        </div>
+
+        <div id="payment-panel" class="panel" style="display: none; text-align: center;">
+          <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.5rem 0;">Thanh toán đơn hàng</h1>
+          <div style="font-size: 0.9rem; color: var(--text-secondary);">
+            Mã đơn: <strong id="order-id-label" class="font-number" style="color: var(--text-main);">-</strong>
+          </div>
+
+          <div style="margin: 1.5rem 0; padding: 1.25rem; background: var(--bg-subtle, #F9FAFB); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+            <div style="font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Số tiền cần thanh toán</div>
+            <div id="payment-amount" class="font-number" style="font-size: 2.25rem; font-weight: 700; color: var(--primary); margin-top: 0.2rem;">0 đ</div>
+            <div id="payment-method-badge" style="margin-top: 0.5rem;"></div>
+          </div>
+
+          <!-- Simulated QR or Card UI -->
+          <div id="simulated-payment-ui">
+            <div class="qr-box">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto; color: var(--text-main); display: block;"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Mô phỏng quét mã thanh toán</div>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+              Đây là môi trường thanh toán trực tuyến mô phỏng của hệ thống Góc Của Vin.
+            </p>
+          </div>
+
+          <!-- Success Screen -->
+          <div id="payment-success-ui" style="display: none; padding: 1.5rem 0;">
+            <div style="margin-bottom: 0.75rem;">
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="16 9 10 15 7 12"></polyline></svg>
+            </div>
+            <h3 style="color: #10B981; font-size: 1.5rem;">Thanh toán thành công!</h3>
+            <p style="font-size: 0.9rem; margin-top: 0.4rem; color: var(--text-secondary);">
+              Mã giao dịch: <strong id="transaction-id-text" class="font-number" style="color: var(--text-main);">-</strong>
+            </p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+              Thời gian: <span id="payment-time-text" class="font-number">-</span>
+            </p>
+            <a href="/my-orders.html" class="btn btn-primary btn-block btn-lg" style="margin-top: 1.75rem;">
+              Xem đơn hàng của bạn →
+            </a>
+          </div>
+
+          <!-- Pay Button -->
+          <div id="payment-action-wrap">
+            <button id="btn-confirm-pay" class="btn btn-primary btn-block btn-lg" style="margin-bottom: 0.75rem;">
+              Xác nhận thanh toán ngay
+            </button>
+            <a href="/my-orders.html" class="btn btn-outline btn-block btn-sm">
+              Để sau, thanh toán sau
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <span>© 2026 Góc Của Vin. Nền tảng sách trực tuyến.</span>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/payment.js"></script>
+</body>
+</html>

@@ -20,6 +20,12 @@ public class AuthResponse {
     /** Tên đăng nhập */
     String userName;
 
+    /** Họ và tên hiển thị */
+    String fullName;
+
+    /** Đường dẫn ảnh đại diện */
+    String avatarPath;
+
     /** Role: ROLE_USER hoặc ROLE_ADMIN */
     String role;
 

@@ -9,10 +9,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
@@ -69,9 +74,7 @@ public class ImageService {
         String datePath = LocalDate.now()
                 .format(DateTimeFormatter.ofPattern("yyyy/MM"));
 
-        // Dùng đường dẫn tuyệt đối từ working directory để tránh lỗi path
-        Path uploadDir = Paths.get(System.getProperty("user.dir"),
-                                   appProperties.getDir(), datePath);
+        Path uploadDir = appProperties.getAbsoluteUploadDir().resolve(datePath);
         Files.createDirectories(uploadDir);
         log.info("Upload directory: {}", uploadDir.toAbsolutePath());
 
@@ -106,6 +109,68 @@ public class ImageService {
     }
 
     /**
+     * Tải ảnh từ đường dẫn URL trên mạng, resize thành 3 kích thước và lưu vào disk.
+     *
+     * @param imageUrl Đường dẫn URL công khai của ảnh
+     * @param bookId   ID của sách
+     * @return coverPath (yyyy/MM/bookId) hoặc null nếu không tải được ảnh
+     */
+    public String processAndSaveFromUrl(String imageUrl, String bookId) {
+        if (imageUrl == null || imageUrl.isBlank()) return null;
+
+        try {
+            HttpClient client = HttpClient.newBuilder()
+                    .followRedirects(HttpClient.Redirect.NORMAL)
+                    .connectTimeout(Duration.ofSeconds(10))
+                    .build();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(imageUrl.trim()))
+                    .timeout(Duration.ofSeconds(15))
+                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    .GET()
+                    .build();
+
+            HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            if (response.statusCode() != 200) {
+                log.warn("Không thể tải ảnh từ URL {}: HTTP status {}", imageUrl, response.statusCode());
+                return null;
+            }
+
+            try (InputStream in = response.body()) {
+                BufferedImage originalImage = ImageIO.read(in);
+                if (originalImage == null) {
+                    log.warn("URL {} không trả về định dạng ảnh hợp lệ", imageUrl);
+                    return null;
+                }
+
+                String datePath = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM"));
+                Path uploadDir = appProperties.getAbsoluteUploadDir().resolve(datePath);
+                Files.createDirectories(uploadDir);
+
+                for (Map.Entry<String, Integer> entry : SIZES.entrySet()) {
+                    String sizeName   = entry.getKey();
+                    int    targetWidth = entry.getValue();
+                    String fileName   = bookId + "-" + sizeName + OUTPUT_EXTENSION;
+                    Path   outputPath = uploadDir.resolve(fileName);
+
+                    Thumbnails.of(originalImage)
+                            .width(targetWidth)
+                            .outputFormat(OUTPUT_FORMAT)
+                            .outputQuality(0.85)
+                            .toFile(outputPath.toFile());
+                }
+
+                log.info("Đã tải và lưu thành công ảnh bìa từ URL cho sách id={}", bookId);
+                return datePath + "/" + bookId;
+            }
+        } catch (Exception e) {
+            log.warn("Lỗi khi tải ảnh từ URL {} cho sách id={}: {}", imageUrl, bookId, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Xóa tất cả 3 file ảnh khi xóa sách.
      *
      * @param coverPath Giá trị coverPath từ DB (ví dụ: "2026/08/abc-123")
@@ -114,8 +179,8 @@ public class ImageService {
         if (coverPath == null || coverPath.isBlank()) return;
 
         SIZES.keySet().forEach(size -> {
-            Path filePath = Paths.get(System.getProperty("user.dir"),
-                    appProperties.getDir(), coverPath + "-" + size + OUTPUT_EXTENSION);
+            Path filePath = appProperties.getAbsoluteUploadDir()
+                    .resolve(coverPath + "-" + size + OUTPUT_EXTENSION);
             try {
                 boolean deleted = Files.deleteIfExists(filePath);
                 if (deleted) log.info("Deleted image: {}", filePath);
@@ -132,12 +197,13 @@ public class ImageService {
      * @param size      Kích thước: "thumbnail", "medium", "large"
      */
     public Path resolveImagePath(String coverPath, String size) {
-        if (!SIZES.containsKey(size)) {
-            throw new IllegalArgumentException(
-                "Size không hợp lệ. Chọn: " + String.join(", ", SIZES.keySet()));
+        // Fallback về "medium" nếu size không hợp lệ, tránh trả 500 về cho client
+        String resolvedSize = SIZES.containsKey(size) ? size : "medium";
+        if (!resolvedSize.equals(size)) {
+            log.warn("Size '{}' không hợp lệ, fallback về 'medium'", size);
         }
-        return Paths.get(System.getProperty("user.dir"),
-                appProperties.getDir(), coverPath + "-" + size + OUTPUT_EXTENSION);
+        return appProperties.getAbsoluteUploadDir()
+                .resolve(coverPath + "-" + resolvedSize + OUTPUT_EXTENSION);
     }
 
     // ─────────────────────────────────────────────────────────────

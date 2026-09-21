@@ -66,9 +66,13 @@ public class SecurityConfig {
 
                 // Public: các file tĩnh (HTML/JS/CSS)
                 .requestMatchers(
-                    "/", "/index.html", "/login.html", "/register.html",
+                    "/", "/*.html", "/admin/**",
                     "/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico"
                 ).permitAll()
+
+                // Reviews: người dùng đã đăng nhập có thể viết bình luận hoặc xóa bình luận của mình
+                .requestMatchers(HttpMethod.POST, "/api/books/*/reviews", "/api/books/*/reviews/**").authenticated()
+                .requestMatchers("/api/reviews", "/api/reviews/**").authenticated()
 
                 // Chỉ ADMIN: thêm, sửa, xóa sách
                 .requestMatchers(HttpMethod.POST,   "/api/books", "/api/books/**").hasRole("ADMIN")

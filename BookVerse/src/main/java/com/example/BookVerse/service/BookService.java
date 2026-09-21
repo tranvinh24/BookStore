@@ -3,6 +3,7 @@ package com.example.BookVerse.service;
 import com.example.BookVerse.Mapper.BookMapper;
 import com.example.BookVerse.dto.request.BookCreateRequest;
 import com.example.BookVerse.dto.request.BookUpdateRequest;
+import com.example.BookVerse.dto.response.BookImportResult;
 import com.example.BookVerse.dto.response.BookPageResponse;
 import com.example.BookVerse.dto.response.BookRespone;
 import com.example.BookVerse.entity.Book;
@@ -11,12 +12,14 @@ import com.example.BookVerse.exception.ErrorCode;
 import com.example.BookVerse.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +28,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -37,9 +44,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookService {
 
-    private final BookRepository bookRepository;
-    private final BookMapper     bookMapper;
-    private final ImageService   imageService;
+    private final BookRepository        bookRepository;
+    private final BookMapper            bookMapper;
+    private final ImageService          imageService;
+    private final BookFileParserService bookFileParserService;
 
     // ─────────────────────────────────────────────────────────────
     // CRUD operations
@@ -126,11 +134,15 @@ public class BookService {
     @Transactional
     public BookRespone updateBook(String id, BookUpdateRequest request, MultipartFile coverFile) {
         Book book = findBookOrThrow(id);
+        String oldCoverPath = book.getCoverPath();
+
         bookMapper.updateBook(book, request);
 
         if (coverFile != null && !coverFile.isEmpty()) {
             try {
-                imageService.deleteImages(book.getCoverPath());
+                if (oldCoverPath != null && !oldCoverPath.isBlank()) {
+                    imageService.deleteImages(oldCoverPath);
+                }
                 String newCoverPath = imageService.processAndSave(coverFile, book.getId());
                 book.setCoverPath(newCoverPath);
             } catch (IOException e) {
@@ -177,10 +189,101 @@ public class BookService {
             throw new AppException(ErrorCode.FILE_NOT_FOUND, "File ảnh không tồn tại trên server");
         }
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .header(HttpHeaders.CACHE_CONTROL, "public, max-age=86400")  // cache 1 ngày
-                .body(resource);
+        // Dùng Last-Modified từ file thực tế để browser tái validate mỗi lần.
+        // Tránh dùng max-age cố định vì khi admin cập nhật ảnh, browser sẽ dùng cache cũ.
+        try {
+            long lastModifiedMillis = Files.getLastModifiedTime(imagePath).toMillis();
+            String lastModified = DateTimeFormatter.RFC_1123_DATE_TIME.format(
+                    ZonedDateTime.ofInstant(
+                            java.time.Instant.ofEpochMilli(lastModifiedMillis),
+                            ZoneOffset.UTC));
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .cacheControl(CacheControl.noCache())   // buộc browser tái validate
+                    .header(HttpHeaders.LAST_MODIFIED, lastModified)
+                    .body(resource);
+        } catch (IOException e) {
+            log.warn("Không đọc được last-modified của file ảnh: {}", imagePath);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .cacheControl(CacheControl.noCache())
+                    .body(resource);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Bulk Import from XLSX / CSV & Template Download
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Nhập sách hàng loạt từ file Excel (.xlsx, .xls) hoặc CSV (.csv).
+     */
+    @Transactional
+    public BookImportResult importBooks(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_FILE_FORMAT, "Vui lòng chọn file Excel hoặc CSV để tải lên");
+        }
+
+        try {
+            BookFileParserService.ParseResult parseResult = bookFileParserService.parseFile(file);
+
+            List<Book> savedBooks = new java.util.ArrayList<>();
+            for (BookFileParserService.ParsedBookItem item : parseResult.getValidItems()) {
+                Book book = item.getBook();
+                book = bookRepository.save(book);
+
+                if (item.getImageUrl() != null && !item.getImageUrl().isBlank()) {
+                    String coverPath = imageService.processAndSaveFromUrl(item.getImageUrl(), book.getId());
+                    if (coverPath != null) {
+                        book.setCoverPath(coverPath);
+                        book = bookRepository.save(book);
+                    }
+                }
+                savedBooks.add(book);
+            }
+
+            List<BookRespone> importedResponses = savedBooks.stream()
+                    .map(bookMapper::toBookRespone)
+                    .toList();
+
+            return BookImportResult.builder()
+                    .totalRows(parseResult.getTotalRows())
+                    .successCount(savedBooks.size())
+                    .failedCount(parseResult.getErrors().size())
+                    .importedBooks(importedResponses)
+                    .errors(parseResult.getErrors())
+                    .build();
+
+        } catch (IllegalArgumentException e) {
+            throw new AppException(ErrorCode.INVALID_FILE_FORMAT, e.getMessage());
+        } catch (Exception e) {
+            log.error("Lỗi khi đọc file import sách: {}", e.getMessage(), e);
+            throw new AppException(ErrorCode.FILE_STORAGE_ERROR, "Không thể đọc và xử lý file: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Tạo file mẫu nhập sách chuẩn (.xlsx hoặc .csv).
+     */
+    public ResponseEntity<Resource> generateTemplate(String format) {
+        try {
+            boolean isCsv = "csv".equalsIgnoreCase(format);
+            byte[] content = isCsv ? bookFileParserService.generateCsvTemplate() : bookFileParserService.generateExcelTemplate();
+            String filename = isCsv ? "mau_nhap_sach.csv" : "mau_nhap_sach.xlsx";
+            MediaType mediaType = isCsv
+                    ? MediaType.parseMediaType("text/csv; charset=UTF-8")
+                    : MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+            ByteArrayResource resource = new ByteArrayResource(content);
+
+            return ResponseEntity.ok()
+                    .contentType(mediaType)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .body(resource);
+        } catch (IOException e) {
+            log.error("Lỗi khi tạo file mẫu sách: {}", e.getMessage());
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION, "Không thể tạo file mẫu: " + e.getMessage());
+        }
     }
 
     // ─────────────────────────────────────────────────────────────

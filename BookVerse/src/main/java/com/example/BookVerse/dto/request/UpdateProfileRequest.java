@@ -3,18 +3,18 @@ package com.example.BookVerse.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import java.time.LocalDate;
 
 @Data
 public class UpdateProfileRequest {
-    @Email(message = "Email khong dung dinh dang")
+    @Size(max = 150, message = "Tên hiển thị tối đa 150 ký tự")
+    private String fullName;
+
+    @Email(message = "Email không đúng định dạng")
     private String email;
 
-    @Size(max = 15, message = "So dien thoai toi da 15 ky tu")
+    @Size(max = 15, message = "Số điện thoại tối đa 15 ký tự")
     private String sdt;
 
-    @Size(min = 6, message = "Mat khau toi thieu 6 ky tu")
-    private String newPassword;
-
-    /** Mat khau hien tai - bat buoc khi doi mat khau */
-    private String currentPassword;
+    private LocalDate dateOfBirth;
 }

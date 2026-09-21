@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đặt hàng — Góc Của Vin</title>
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .checkout-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 1.75rem;
+      align-items: start;
+    }
+    .payment-option {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .payment-option:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .payment-option.active {
+      border-color: var(--primary);
+      background: #FFF1F0;
+    }
+    @media (max-width: 860px) {
+      .checkout-layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header"></header>
+
+  <main class="main-content">
+    <div class="container">
+      
+      <div style="text-align: center; margin: 1.75rem 0 2rem 0;">
+        <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; margin: 0;">Tiến hành đặt hàng</h1>
+      </div>
+
+      <div class="stepper">
+        <div class="step-item completed">
+          <div class="step-circle">✓</div>
+          <div class="step-title">Giỏ hàng</div>
+        </div>
+        <div class="step-item active">
+          <div class="step-circle">2</div>
+          <div class="step-title">Đặt hàng</div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle">3</div>
+          <div class="step-title">Thanh toán</div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle">4</div>
+          <div class="step-title">Hoàn tất</div>
+        </div>
+      </div>
+
+      <form id="checkout-form" class="checkout-layout">
+        
+        <div>
+          <!-- Shipping Information -->
+          <div class="panel" style="margin-bottom: 1.5rem;">
+            <div class="panel-header">
+              <h2 style="font-size: 1.15rem;">1. Thông tin giao hàng</h2>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="field">
+                <label class="field-label">Họ và tên người nhận <span class="required">*</span></label>
+                <input type="text" id="recipient-name" class="field-input" placeholder="Nguyễn Văn A" required />
+                <div class="field-error" id="err-recipient-name"></div>
+              </div>
+
+              <div class="field">
+                <label class="field-label">Số điện thoại nhận hàng <span class="required">*</span></label>
+                <input type="tel" id="recipient-phone" class="field-input" placeholder="0912345678" required />
+                <div class="field-error" id="err-recipient-phone"></div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label">Địa chỉ nhận hàng chi tiết <span class="required">*</span></label>
+              <input type="text" id="shipping-address" class="field-input" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố" required />
+              <div class="field-error" id="err-shipping-address"></div>
+            </div>
+
+            <div class="field" style="margin-bottom: 0;">
+              <label class="field-label">Ghi chú giao hàng (Tùy chọn)</label>
+              <textarea id="order-note" class="field-textarea" rows="2" placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi giao..."></textarea>
+            </div>
+          </div>
+
+          <!-- Payment Method Selection -->
+          <div class="panel">
+            <div class="panel-header">
+              <h2 style="font-size: 1.15rem;">2. Phương thức thanh toán</h2>
+            </div>
+
+            <div class="payment-options-list">
+              <label class="payment-option active">
+                <input type="radio" name="paymentMethod" value="COD" checked />
+                <div>
+                  <strong>Thanh toán khi nhận hàng (COD)</strong>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Thanh toán bằng tiền mặt khi shipper giao sách</div>
+                </div>
+              </label>
+
+              <label class="payment-option">
+                <input type="radio" name="paymentMethod" value="VNPAY" />
+                <div>
+                  <strong>Cổng VNPAY / QR Ngân hàng</strong>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Quét mã QR qua ứng dụng ngân hàng di động</div>
+                </div>
+              </label>
+
+              <label class="payment-option">
+                <input type="radio" name="paymentMethod" value="MOMO" />
+                <div>
+                  <strong>Ví điện tử MoMo</strong>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Thanh toán nhanh qua ví điện tử MoMo</div>
+                </div>
+              </label>
+
+              <label class="payment-option">
+                <input type="radio" name="paymentMethod" value="CREDIT_CARD" />
+                <div>
+                  <strong>Thẻ tín dụng / Thẻ ghi nợ Quốc tế</strong>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Visa, MasterCard, JCB</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="panel" style="position: sticky; top: 90px;">
+          <h3 style="font-size: 1.1rem; margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border);">
+            Đơn hàng của bạn
+          </h3>
+
+          <div id="checkout-items-preview" style="max-height: 240px; overflow-y: auto; margin-bottom: 1rem; font-size: 0.88rem;"></div>
+
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem; font-size: 0.9rem; color: var(--text-secondary);">
+            <span>Tạm tính:</span>
+            <strong id="chk-subtotal" class="font-number" style="color: var(--text-main);">0 đ</strong>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.9rem; color: var(--text-secondary);">
+            <span>Phí vận chuyển:</span>
+            <span class="ribbon ribbon-green">Miễn phí</span>
+          </div>
+
+          <div style="border-top: 1px dashed var(--border); padding-top: 0.9rem; margin-top: 0.9rem; display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem;">
+            <span style="font-weight: 700; font-size: 1rem;">Tổng cộng:</span>
+            <strong id="chk-total" class="font-number" style="font-size: 1.5rem; color: var(--primary);">0 đ</strong>
+          </div>
+
+          <button type="submit" id="btn-submit-order" class="btn btn-primary btn-block btn-lg" style="font-weight: 700;">
+            Xác nhận đặt hàng
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <span>© 2026 Góc Của Vin. Nhà sách trực tuyến chính hãng.</span>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/checkout.js"></script>
+</body>
+</html>

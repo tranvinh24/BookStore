@@ -1,952 +1,241 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BookVerse — Quản lý sách điện tử</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    /* ── Reset & Base ───────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:        #0f1117;
-      --surface:   #1a1d2e;
-      --surface2:  #252840;
-      --border:    #2e3250;
-      --accent:    #6c63ff;
-      --accent2:   #ff6584;
-      --accent3:   #43e97b;
-      --text:      #e8eaf6;
-      --muted:     #8b92b8;
-      --danger:    #ff5252;
-      --radius:    12px;
-      --shadow:    0 8px 32px rgba(0,0,0,.4);
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    /* ── Header ─────────────────────────────────────────────────── */
-    header {
-      background: linear-gradient(135deg, #1a1d2e 0%, #252840 100%);
-      border-bottom: 1px solid var(--border);
-      padding: 0 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 64px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(12px);
-    }
-
-    .logo {
-      font-size: 1.4rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .header-actions { display: flex; gap: .75rem; }
-
-    /* ── Buttons ─────────────────────────────────────────────────── */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .4rem;
-      padding: .5rem 1.1rem;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: .85rem;
-      font-weight: 500;
-      transition: all .2s;
-    }
-    .btn-primary  { background: var(--accent);  color: #fff; }
-    .btn-primary:hover  { background: #5a52e8; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(108,99,255,.4); }
-    .btn-danger   { background: var(--danger);  color: #fff; }
-    .btn-danger:hover   { background: #e04040; }
-    .btn-ghost    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-    .btn-ghost:hover    { background: var(--surface2); color: var(--text); }
-    .btn-sm { padding: .35rem .75rem; font-size: .78rem; }
-
-    /* ── Layout ──────────────────────────────────────────────────── */
-    .container { max-width: 1280px; margin: 0 auto; padding: 2rem; }
-
-    /* ── Search & Filter Bar ─────────────────────────────────────── */
-    .search-bar {
-      display: flex;
-      gap: .75rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .search-input-wrap {
-      flex: 1;
-      min-width: 240px;
-      position: relative;
-    }
-    .search-input-wrap svg {
-      position: absolute;
-      left: .9rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted);
-      pointer-events: none;
-    }
-    input[type="text"], input[type="number"], input[type="file"],
-    select, textarea {
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-family: inherit;
-      font-size: .9rem;
-      padding: .6rem .9rem;
-      transition: border-color .2s;
-      outline: none;
-    }
-    .search-input-wrap input { padding-left: 2.5rem; }
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(108,99,255,.15);
-    }
-    select { cursor: pointer; }
-
-    /* ── Stats row ───────────────────────────────────────────────── */
-    .stats-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.25rem;
-      color: var(--muted);
-      font-size: .85rem;
-    }
-
-    /* ── Book Grid ───────────────────────────────────────────────── */
-    .book-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .book-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      transition: transform .25s, box-shadow .25s;
-      cursor: pointer;
-    }
-    .book-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow);
-      border-color: var(--accent);
-    }
-
-    .book-cover {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      background: var(--surface2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--muted);
-      font-size: 3rem;
-    }
-    .book-cover img { width: 100%; height: 100%; object-fit: cover; }
-
-    .book-info { padding: .9rem; }
-    .book-title {
-      font-weight: 600;
-      font-size: .92rem;
-      margin-bottom: .25rem;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .book-author { color: var(--muted); font-size: .8rem; margin-bottom: .5rem; }
-    .book-meta {
-      display: flex;
-      gap: .5rem;
-      flex-wrap: wrap;
-      margin-bottom: .75rem;
-    }
-    .badge {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: .15rem .5rem;
-      font-size: .72rem;
-      color: var(--muted);
-    }
-    .badge.accent { background: rgba(108,99,255,.15); border-color: var(--accent); color: var(--accent); }
-
-    .rating {
-      display: flex;
-      align-items: center;
-      gap: .25rem;
-      font-size: .8rem;
-      color: #fbbf24;
-      font-weight: 600;
-    }
-
-    .book-actions { display: flex; gap: .5rem; }
-
-    /* ── Pagination ──────────────────────────────────────────────── */
-    .pagination {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: .5rem;
-      margin-top: 2rem;
-    }
-    .page-btn {
-      width: 36px; height: 36px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      cursor: pointer;
-      font-size: .85rem;
-      font-family: inherit;
-      display: flex; align-items: center; justify-content: center;
-      transition: all .2s;
-    }
-    .page-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .page-btn:disabled { opacity: .35; cursor: default; }
-
-    /* ── Modal ───────────────────────────────────────────────────── */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.7);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .25s;
-    }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
-
-    .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      width: min(560px, 95vw);
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: var(--shadow);
-      transform: scale(.95) translateY(20px);
-      transition: transform .25s;
-    }
-    .modal-overlay.open .modal { transform: scale(1) translateY(0); }
-
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .modal-header h2 { font-size: 1.1rem; font-weight: 600; }
-    .modal-close {
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 1.3rem;
-      padding: .25rem;
-      border-radius: 6px;
-      transition: color .2s;
-    }
-    .modal-close:hover { color: var(--text); }
-
-    .modal-body { padding: 1.5rem; }
-
-    .form-group { margin-bottom: 1.1rem; }
-    .form-label {
-      display: block;
-      font-size: .83rem;
-      font-weight: 500;
-      color: var(--muted);
-      margin-bottom: .4rem;
-    }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
-
-    .cover-preview {
-      width: 100%;
-      height: 140px;
-      border: 2px dashed var(--border);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--muted);
-      font-size: .85rem;
-      cursor: pointer;
-      transition: border-color .2s;
-      overflow: hidden;
-      margin-bottom: .5rem;
-    }
-    .cover-preview:hover { border-color: var(--accent); }
-    .cover-preview img { width: 100%; height: 100%; object-fit: cover; }
-
-    .modal-footer {
-      display: flex;
-      gap: .75rem;
-      justify-content: flex-end;
-      padding: 1rem 1.5rem;
-      border-top: 1px solid var(--border);
-    }
-
-    /* ── Detail Modal ────────────────────────────────────────────── */
-    .detail-cover {
-      width: 100%;
-      height: 240px;
-      object-fit: cover;
-      border-radius: 8px;
-      background: var(--surface2);
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 4rem;
-      overflow: hidden;
-    }
-    .detail-cover img { width: 100%; height: 100%; object-fit: cover; }
-
-    .detail-title { font-size: 1.3rem; font-weight: 700; margin-bottom: .35rem; }
-    .detail-author { color: var(--muted); margin-bottom: 1rem; }
-    .detail-desc {
-      color: var(--muted);
-      font-size: .88rem;
-      line-height: 1.6;
-      margin-top: .75rem;
-    }
-    .detail-meta-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: .5rem;
-      margin-top: .75rem;
-    }
-    .detail-meta-item { background: var(--surface2); border-radius: 8px; padding: .6rem .9rem; }
-    .detail-meta-label { font-size: .73rem; color: var(--muted); margin-bottom: .15rem; }
-    .detail-meta-value { font-size: .9rem; font-weight: 500; }
-
-    /* ── Toast ───────────────────────────────────────────────────── */
-    #toast-container {
-      position: fixed;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      z-index: 999;
-      display: flex;
-      flex-direction: column;
-      gap: .5rem;
-    }
-    .toast {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--accent3);
-      border-radius: 8px;
-      padding: .8rem 1.2rem;
-      font-size: .88rem;
-      box-shadow: var(--shadow);
-      animation: slideIn .3s ease;
-      min-width: 260px;
-    }
-    .toast.error { border-left-color: var(--danger); }
-    @keyframes slideIn {
-      from { transform: translateX(120%); opacity: 0; }
-      to   { transform: translateX(0);    opacity: 1; }
-    }
-
-    /* ── Empty state ─────────────────────────────────────────────── */
-    .empty-state {
-      text-align: center;
-      padding: 4rem 2rem;
-      color: var(--muted);
-    }
-    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
-    .empty-state p { margin-bottom: 1rem; }
-
-    /* ── Loading spinner ─────────────────────────────────────────── */
-    .spinner {
-      width: 36px; height: 36px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      margin: 3rem auto;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Scrollbar ───────────────────────────────────────────────── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-    /* ── Auth Nav ────────────────────────────────────────────────── */
-    .nav-user {
-      display: flex;
-      align-items: center;
-      gap: .75rem;
-    }
-    .nav-user-name {
-      font-size: .85rem;
-      font-weight: 500;
-      color: var(--text);
-      background: var(--surface2);
-      padding: .35rem .8rem;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-    }
-    .nav-user-name span {
-      color: var(--accent);
-      margin-right: 4px;
-    }
-    .btn-logout {
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
-      padding: .35rem .8rem;
-      font-size: .82rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all .2s;
-    }
-    .btn-logout:hover { background: var(--surface2); color: var(--danger); border-color: var(--danger); }
-  </style>
+  <title>Góc Của Vin — Nhà sách trực tuyến chính hãng</title>
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
+
 <body>
+  <header class="header"></header>
 
-<!-- ── Header ──────────────────────────────────────────────────── -->
-<header>
-  <div class="logo">📚 BookVerse</div>
-  <div class="header-actions" id="headerActions">
-    <!-- Render bằng JS dựa trên trạng thái đăng nhập -->
-  </div>
-</header>
+  <!-- Hero Section with Image Carousel -->
+  <section class="hero-section">
+    <div class="container">
 
-<!-- ── Main Content ─────────────────────────────────────────────── -->
-<div class="container">
-
-  <!-- Search & Filter -->
-  <div class="search-bar">
-    <div class="search-input-wrap">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
-           viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="searchInput" placeholder="Tìm theo tên sách hoặc tác giả…"
-             oninput="debounceSearch()" />
-    </div>
-    <select id="categoryFilter" onchange="loadBooks(0)">
-      <option value="">Tất cả thể loại</option>
-      <option>Programming</option>
-      <option>Fiction</option>
-      <option>Science</option>
-      <option>History</option>
-      <option>Self-Help</option>
-      <option>Business</option>
-      <option>Technology</option>
-    </select>
-    <input type="number" id="yearFilter" placeholder="Năm" min="1900" max="2100"
-           style="width:100px" onchange="loadBooks(0)" />
-    <select id="sortSelect" onchange="loadBooks(0)">
-      <option value="title|asc">Tên A→Z</option>
-      <option value="title|desc">Tên Z→A</option>
-      <option value="year|desc">Năm mới nhất</option>
-      <option value="year|asc">Năm cũ nhất</option>
-      <option value="rating|desc">Rating cao nhất</option>
-      <option value="rating|asc">Rating thấp nhất</option>
-    </select>
-  </div>
-
-  <!-- Stats row -->
-  <div class="stats-row">
-    <span id="statsText">Đang tải...</span>
-  </div>
-
-  <!-- Book Grid -->
-  <div id="bookGrid"></div>
-
-  <!-- Pagination -->
-  <div class="pagination" id="pagination"></div>
-</div>
-
-<!-- ── Add / Edit Modal ─────────────────────────────────────────── -->
-<div class="modal-overlay" id="formModal" onclick="closeOnOverlay(event,'formModal')">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 id="formModalTitle">Thêm sách mới</h2>
-      <button class="modal-close" onclick="closeModal('formModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="editId" />
-
-      <!-- Cover upload -->
-      <div class="form-group">
-        <label class="form-label">Ảnh bìa</label>
-        <div class="cover-preview" id="coverPreview" onclick="document.getElementById('coverInput').click()">
-          <span>🖼️ Click để chọn ảnh</span>
+      <!-- Banner Carousel -->
+      <div class="banner-carousel" id="main-banner-carousel">
+        <div class="carousel-slides" id="carousel-slides">
+          <div class="carousel-slide">
+            <img src="/images/banners/banner3.jpg" alt="Kiến tạo doanh nghiệp thành công" />
+          </div>
+          <div class="carousel-slide">
+            <img src="/images/banners/banner6.jpg" alt="Sách mới nổi bật" />
+          </div>
+          <div class="carousel-slide">
+            <img src="/images/banners/banner4.jpg" alt="Đọc sách vì tương lai" />
+          </div>
         </div>
-        <input type="file" id="coverInput" accept="image/*" style="display:none"
-               onchange="previewCover(event)" />
+
+        <button class="carousel-btn carousel-btn-prev" id="carousel-prev-btn" aria-label="Slide trước">‹</button>
+        <button class="carousel-btn carousel-btn-next" id="carousel-next-btn" aria-label="Slide kế tiếp">›</button>
+
+        <div class="carousel-dots" id="carousel-dots">
+          <span class="carousel-dot active" data-index="0"></span>
+          <span class="carousel-dot" data-index="1"></span>
+          <span class="carousel-dot" data-index="2"></span>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Tên sách *</label>
-        <input type="text" id="f-title" placeholder="Nhập tên sách" maxlength="200" />
+      <!-- 4 Clean Trust Badges (No redundant emojis) -->
+      <div class="trust-badges-grid">
+        <div class="trust-badge-item">
+          <div class="trust-badge-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="3" width="15" height="13"></rect>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+              <circle cx="5.5" cy="18.5" r="2.5"></circle>
+              <circle cx="18.5" cy="18.5" r="2.5"></circle>
+            </svg>
+          </div>
+          <div>
+            <div class="trust-badge-title">Giao hàng toàn quốc</div>
+            <div class="trust-badge-desc">Miễn phí giao mọi đơn hàng</div>
+          </div>
+        </div>
+
+        <div class="trust-badge-item">
+          <div class="trust-badge-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="trust-badge-title">100% Sách bản quyền</div>
+            <div class="trust-badge-desc">Phát hành chuẩn chính hãng</div>
+          </div>
+        </div>
+
+        <div class="trust-badge-item">
+          <div class="trust-badge-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="trust-badge-title">Đổi trả trong 7 ngày</div>
+            <div class="trust-badge-desc">Thủ tục nhanh chóng & dễ dàng</div>
+          </div>
+        </div>
+
+        <div class="trust-badge-item">
+          <div class="trust-badge-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+              </path>
+            </svg>
+          </div>
+          <div>
+            <div class="trust-badge-title">Hỗ trợ tư vấn 24/7</div>
+            <div class="trust-badge-desc">Hotline chăm sóc 1900 6868</div>
+          </div>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Tác giả *</label>
-        <input type="text" id="f-author" placeholder="Nhập tên tác giả" maxlength="200" />
-      </div>
+    </div>
+  </section>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Thể loại *</label>
-          <select id="f-category">
-            <option value="">-- Chọn thể loại --</option>
-            <option>Programming</option>
-            <option>Fiction</option>
-            <option>Science</option>
-            <option>History</option>
-            <option>Self-Help</option>
-            <option>Business</option>
-            <option>Technology</option>
+  <!-- Main Catalog Content -->
+  <main class="main-content" id="catalog-area">
+    <div class="container">
+
+      <!-- Section Header -->
+      <div class="section-header">
+        <div class="section-title">
+          <span class="bar"></span>
+          <span id="catalog-main-title">Tất Cả Tủ Sách</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <span id="results-count" style="font-size: 0.85rem; color: var(--text-muted);">Đang tải...</span>
+          <select id="sort-select" class="field-select"
+            style="width: auto; padding: 0.35rem 0.75rem; font-size: 0.85rem;">
+            <option value="title:asc">Tên sách: A → Z</option>
+            <option value="title:desc">Tên sách: Z → A</option>
+            <option value="rating:desc">Đánh giá cao nhất</option>
+            <option value="year:desc">Mới xuất bản</option>
           </select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Năm xuất bản *</label>
-          <input type="number" id="f-year" placeholder="VD: 2023" min="1900" max="2100" />
+      </div>
+
+      <!-- Active Filter Badges -->
+      <div id="active-filters-bar" style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.25rem;"></div>
+
+      <!-- Full-Width Books Grid (4 cols desktop, 3 tablet, 2 mobile) -->
+      <div id="books-grid" class="books-grid"></div>
+
+      <!-- Empty State -->
+      <div id="books-empty" class="panel" style="display: none; text-align: center; padding: 4rem 1.5rem;">
+        <h3>Không tìm thấy cuốn sách nào phù hợp</h3>
+        <p
+          style="margin-top: 0.4rem; max-width: 420px; margin-left: auto; margin-right: auto; color: var(--text-secondary);">
+          Hãy thử tìm kiếm với từ khóa khác hoặc khám phá tất cả các danh mục sách.
+        </p>
+        <button id="btn-empty-reset" class="btn btn-primary" style="margin-top: 1.25rem;">Xem tất cả sách</button>
+      </div>
+
+      <!-- Pagination -->
+      <div id="pagination-wrap" class="pagination" style="display: none;"></div>
+
+      <!-- Showcase Section: Sách Bán Chạy Nhất -->
+      <section class="catalog-showcase-section" id="section-bestsellers">
+        <div class="section-header">
+          <div class="section-title">
+            <span class="bar" style="background: #D97706;"></span>
+            <span>Sách Bán Chạy Nhất</span>
+          </div>
+          <a href="/index.html?sort=rating:desc" class="showcase-view-link">
+            Xem tất cả <span>→</span>
+          </a>
+        </div>
+        <div id="bestsellers-grid" class="books-grid"></div>
+      </section>
+
+      <!-- Showcase Section: Sách Mới Phát Hành -->
+      <section class="catalog-showcase-section" id="section-new-releases">
+        <div class="section-header">
+          <div class="section-title">
+            <span class="bar"></span>
+            <span>Sách Mới Phát Hành</span>
+          </div>
+          <a href="/index.html?sort=year:desc" class="showcase-view-link">
+            Xem tất cả <span>→</span>
+          </a>
+        </div>
+        <div id="new-releases-grid" class="books-grid"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Clean Footer -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-col">
+        <div class="footer-brand" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.65rem;">
+          <img src="/images/logo.png" alt="Góc Của Vin"
+            style="height: 38px; width: 38px; object-fit: contain; border-radius: 4px;" />
+          <span style="font-weight: 800; font-size: 1.3rem; color: var(--primary);">Góc Của Vin</span>
+        </div>
+        <p style="font-size: 0.85rem; line-height: 1.6; color: var(--text-secondary);">
+          Góc Của Vin — Sách mở ra thế giới tự do. Chuyên cung cấp sách quản trị kinh doanh, phát triển kỹ năng, công
+          nghệ và văn học bản
+          quyền chính hãng tại Việt Nam.
+        </p>
+        <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+          Hotline: <strong style="color: var(--primary);">1900 6868</strong> (8h00 - 21h00)
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">ISBN</label>
-          <input type="text" id="f-isbn" placeholder="978-x-xxxx-xxxx-x" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Rating (0–5) *</label>
-          <input type="number" id="f-rating" placeholder="VD: 4.5" min="0" max="5" step="0.1" />
-        </div>
+      <div class="footer-col">
+        <h4>Về chúng tôi</h4>
+        <ul class="footer-links">
+          <li><a href="/about.html">Giới thiệu Góc Của Vin</a></li>
+          <li><a href="/index.html">Tủ sách khuyên đọc</a></li>
+          <li><a href="/wishlist.html">Danh sách yêu thích</a></li>
+          <li><a href="/my-orders.html">Tra cứu đơn hàng</a></li>
+        </ul>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Mô tả</label>
-        <textarea id="f-desc" rows="3" placeholder="Mô tả ngắn về cuốn sách…" maxlength="2000"></textarea>
+      <div class="footer-col">
+        <h4>Chính sách</h4>
+        <ul class="footer-links">
+          <li><a href="javascript:void(0)">Chính sách bảo mật</a></li>
+          <li><a href="javascript:void(0)">Chính sách đổi trả 7 ngày</a></li>
+          <li><a href="javascript:void(0)">Phương thức thanh toán</a></li>
+          <li><a href="javascript:void(0)">Quy chuẩn đóng gói</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Hỗ trợ khách hàng</h4>
+        <ul class="footer-links">
+          <li>Trụ sở: 123 Đường Sách, Q.1, TP.HCM</li>
+          <li>Email: hotro@goccuavin.com</li>
+          <li>Thanh toán: COD, Visa, MoMo, VNPAY</li>
+        </ul>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('formModal')">Hủy</button>
-      <button class="btn btn-primary" id="submitBtn" onclick="submitForm()">Lưu sách</button>
+
+    <div class="container footer-bottom">
+      <span>© 2026 Góc Của Vin. Tất cả quyền được bảo lưu.</span>
+      <span>Nền tảng thương mại điện tử sách cao cấp.</span>
     </div>
-  </div>
-</div>
+  </footer>
 
-<!-- ── Detail Modal ──────────────────────────────────────────────── -->
-<div class="modal-overlay" id="detailModal" onclick="closeOnOverlay(event,'detailModal')">
-  <div class="modal">
-    <div class="modal-header">
-      <h2>Chi tiết sách</h2>
-      <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
-    </div>
-    <div class="modal-body" id="detailBody"></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger btn-sm" id="detailDeleteBtn">🗑 Xóa</button>
-      <button class="btn btn-ghost btn-sm" id="detailEditBtn">✏️ Sửa</button>
-      <button class="btn btn-ghost" onclick="closeModal('detailModal')">Đóng</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── Toast container ──────────────────────────────────────────── -->
-<div id="toast-container"></div>
-
-<script>
-  // ── Config ─────────────────────────────────────────────────────
-  const API = '/api/books';
-  let currentPage = 0;
-  let totalPages  = 0;
-  let searchTimer = null;
-  let currentDetailId = null;
-
-  // ── Init ────────────────────────────────────────────────────────
-  window.addEventListener('DOMContentLoaded', () => loadBooks(0));
-
-  // ── Debounced search ────────────────────────────────────────────
-  function debounceSearch() {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => loadBooks(0), 400);
-  }
-
-  // ── Load books ──────────────────────────────────────────────────
-  async function loadBooks(page) {
-    currentPage = page;
-    const grid  = document.getElementById('bookGrid');
-    grid.innerHTML = '<div class="spinner"></div>';
-
-    const q        = document.getElementById('searchInput').value.trim();
-    const category = document.getElementById('categoryFilter').value;
-    const year     = document.getElementById('yearFilter').value;
-    const [sort, dir] = document.getElementById('sortSelect').value.split('|');
-
-    try {
-      const params = new URLSearchParams({
-        page: page,
-        size: 12,
-        sort: sort,
-        dir: dir
-      });
-      
-      if (category) params.append('category', category);
-      if (year) params.append('year', year);
-      
-      let url = API;
-      if (q) {
-        url = `${API}/search`;
-        params.append('q', q);
-      }
-      url += '?' + params.toString();
-
-      const res  = await fetch(url);
-      const data = await res.json();
-
-      totalPages = data.totalPages;
-      renderGrid(data.content);
-      renderPagination(data.page, data.totalPages, data.totalElements);
-
-      document.getElementById('statsText').textContent =
-        `Tìm thấy ${data.totalElements} sách · Trang ${data.page + 1}/${Math.max(data.totalPages, 1)}`;
-
-    } catch (err) {
-      grid.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>Không thể kết nối đến API.<br><small>${err.message}</small></p></div>`;
-      document.getElementById('statsText').textContent = '';
-    }
-  }
-
-  // ── Render grid ─────────────────────────────────────────────────
-  function renderGrid(books) {
-    const grid = document.getElementById('bookGrid');
-    if (!books || books.length === 0) {
-      grid.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>Không tìm thấy sách nào.</p><button class="btn btn-primary" onclick="openAddModal()">Thêm sách đầu tiên</button></div>`;
-      return;
-    }
-
-    grid.innerHTML = books.map(b => `
-      <div class="book-card" onclick="openDetail('${b.id}')">
-        <div class="book-cover">
-          ${b.coverPath
-            ? `<img src="${API}/${b.id}/cover?size=thumbnail" alt="${escHtml(b.title)}"
-                    onerror="this.parentElement.innerHTML='📚'" />`
-            : '📚'}
-        </div>
-        <div class="book-info">
-          <div class="book-title">${escHtml(b.title)}</div>
-          <div class="book-author">${escHtml(b.author)}</div>
-          <div class="book-meta">
-            <span class="badge accent">${escHtml(b.category || '')}</span>
-            <span class="badge">${b.year || '—'}</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center">
-            <div class="rating">⭐ ${b.rating?.toFixed(1) ?? '—'}</div>
-            <div class="book-actions" onclick="event.stopPropagation()">
-              <button class="btn btn-ghost btn-sm" onclick="openEditModal('${b.id}')">✏️</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteBook('${b.id}','${escHtml(b.title)}')">🗑</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  // ── Render pagination ────────────────────────────────────────────
-  function renderPagination(page, total, totalEl) {
-    const el = document.getElementById('pagination');
-    if (total <= 1) { el.innerHTML = ''; return; }
-
-    let html = `<button class="page-btn" onclick="loadBooks(${page-1})" ${page===0?'disabled':''}>‹</button>`;
-    for (let i = 0; i < total; i++) {
-      if (total > 7 && Math.abs(i - page) > 2 && i !== 0 && i !== total-1) {
-        if (i === 1 || i === total-2) html += `<span class="page-btn" style="cursor:default">…</span>`;
-        continue;
-      }
-      html += `<button class="page-btn ${i===page?'active':''}" onclick="loadBooks(${i})">${i+1}</button>`;
-    }
-    html += `<button class="page-btn" onclick="loadBooks(${page+1})" ${page===total-1?'disabled':''}>›</button>`;
-    el.innerHTML = html;
-  }
-
-  // ── Detail modal ────────────────────────────────────────────────
-  async function openDetail(id) {
-    currentDetailId = id;
-    openModal('detailModal');
-    document.getElementById('detailBody').innerHTML = '<div class="spinner"></div>';
-
-    try {
-      const res  = await fetch(`${API}/${id}`);
-      const b    = await res.json();
-
-      document.getElementById('detailBody').innerHTML = `
-        <div class="detail-cover">
-          ${b.coverPath
-            ? `<img src="${API}/${b.id}/cover?size=medium" alt="${escHtml(b.title)}"
-                    onerror="this.parentElement.innerHTML='📚'" />`
-            : '📚'}
-        </div>
-        <div class="detail-title">${escHtml(b.title)}</div>
-        <div class="detail-author">✍️ ${escHtml(b.author)}</div>
-        <div class="rating" style="margin-bottom:.5rem">⭐ ${b.rating?.toFixed(1) ?? '—'}/5</div>
-        <div class="detail-meta-grid">
-          <div class="detail-meta-item">
-            <div class="detail-meta-label">Thể loại</div>
-            <div class="detail-meta-value">${escHtml(b.category || '—')}</div>
-          </div>
-          <div class="detail-meta-item">
-            <div class="detail-meta-label">Năm xuất bản</div>
-            <div class="detail-meta-value">${b.year || '—'}</div>
-          </div>
-          <div class="detail-meta-item" style="grid-column:1/-1">
-            <div class="detail-meta-label">ISBN</div>
-            <div class="detail-meta-value">${escHtml(b.isbn || '—')}</div>
-          </div>
-        </div>
-        ${b.description ? `<div class="detail-desc">${escHtml(b.description)}</div>` : ''}
-      `;
-
-      document.getElementById('detailEditBtn').onclick   = () => { closeModal('detailModal'); openEditModal(id); };
-      document.getElementById('detailDeleteBtn').onclick = () => { closeModal('detailModal'); deleteBook(id, b.title); };
-
-    } catch {
-      document.getElementById('detailBody').innerHTML = '<p style="color:var(--danger)">Không thể tải thông tin sách.</p>';
-    }
-  }
-
-  // ── Add / Edit modal ────────────────────────────────────────────
-  function openAddModal() {
-    clearForm();
-    document.getElementById('formModalTitle').textContent = 'Thêm sách mới';
-    document.getElementById('submitBtn').textContent = '＋ Thêm sách';
-    document.getElementById('editId').value = '';
-    openModal('formModal');
-  }
-
-  async function openEditModal(id) {
-    try {
-      const res = await fetch(`${API}/${id}`);
-      const b   = await res.json();
-
-      clearForm();
-      document.getElementById('formModalTitle').textContent = 'Sửa thông tin sách';
-      document.getElementById('submitBtn').textContent = '💾 Lưu thay đổi';
-      document.getElementById('editId').value    = id;
-      document.getElementById('f-title').value   = b.title   || '';
-      document.getElementById('f-author').value  = b.author  || '';
-      document.getElementById('f-isbn').value    = b.isbn    || '';
-      document.getElementById('f-year').value    = b.year    || '';
-      document.getElementById('f-rating').value  = b.rating  || '';
-      document.getElementById('f-desc').value    = b.description || '';
-      document.getElementById('f-category').value = b.category || '';
-
-      if (b.coverPath) {
-        document.getElementById('coverPreview').innerHTML =
-          `<img src="${API}/${id}/cover?size=medium" alt="cover" />`;
-      }
-
-      openModal('formModal');
-    } catch {
-      toast('Không thể tải thông tin sách!', true);
-    }
-  }
-
-  // ── Submit form ─────────────────────────────────────────────────
-  async function submitForm() {
-    const id      = document.getElementById('editId').value;
-    const title   = document.getElementById('f-title').value.trim();
-    const author  = document.getElementById('f-author').value.trim();
-    const category = document.getElementById('f-category').value;
-    const year    = parseInt(document.getElementById('f-year').value);
-    const rating  = parseFloat(document.getElementById('f-rating').value);
-    const isbn    = document.getElementById('f-isbn').value.trim();
-    const desc    = document.getElementById('f-desc').value.trim();
-    const coverFile = document.getElementById('coverInput').files[0];
-
-    // Validate
-    if (!title)    return toast('Vui lòng nhập tên sách!', true);
-    if (!author)   return toast('Vui lòng nhập tác giả!', true);
-    if (!category) return toast('Vui lòng chọn thể loại!', true);
-    if (!year || year < 1900 || year > 2100) return toast('Năm xuất bản không hợp lệ!', true);
-    if (isNaN(rating) || rating < 0 || rating > 5) return toast('Rating phải từ 0 đến 5!', true);
-    
-    // Validate ISBN format if provided
-    if (isbn && !/^(97[89])-\d-\d{2,5}-\d{2,7}-\d$/.test(isbn)) {
-        return toast('ISBN không hợp lệ! VD: 978-0-13-468599-1', true);
-    }
-
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = '⏳ Đang lưu...';
-
-    try {
-      const data = { title, author, category, year, rating };
-      if (isbn) data.isbn = isbn;
-      if (desc) data.description = desc;
-      let res;
-
-      if (coverFile) {
-        // Gửi multipart/form-data khi có ảnh
-        const fd = new FormData();
-        fd.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
-        fd.append('cover', coverFile);
-        res = await fetch(id ? `${API}/${id}` : API, {
-          method: id ? 'PUT' : 'POST',
-          body: fd
-        });
-      } else {
-        // Gửi JSON khi không có ảnh
-        res = await fetch(id ? `${API}/${id}` : API, {
-          method: id ? 'PUT' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-      }
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || `HTTP ${res.status}`);
-      }
-
-      toast(id ? '✅ Đã cập nhật sách!' : '✅ Đã thêm sách mới!');
-      closeModal('formModal');
-      loadBooks(id ? currentPage : 0);
-
-    } catch (err) {
-      toast('Lỗi: ' + err.message, true);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = id ? '💾 Lưu thay đổi' : '＋ Thêm sách';
-    }
-  }
-
-  // ── Delete book ─────────────────────────────────────────────────
-  async function deleteBook(id, title) {
-    if (!confirm(`Xóa sách "${title}"?\nThao tác này không thể hoàn tác.`)) return;
-    try {
-      const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
-      if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`);
-      toast('🗑 Đã xóa sách!');
-      loadBooks(currentPage);
-    } catch (err) {
-      toast('Xóa thất bại: ' + err.message, true);
-    }
-  }
-
-  // ── Cover preview ────────────────────────────────────────────────
-  function previewCover(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    document.getElementById('coverPreview').innerHTML = `<img src="${url}" alt="preview" />`;
-  }
-
-  // ── Modal helpers ────────────────────────────────────────────────
-  function openModal(id)  { document.getElementById(id).classList.add('open'); }
-  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-  function closeOnOverlay(e, id) { if (e.target.id === id) closeModal(id); }
-
-  function clearForm() {
-    ['f-title','f-author','f-isbn','f-year','f-rating','f-desc'].forEach(id => {
-      document.getElementById(id).value = '';
-    });
-    document.getElementById('f-category').value = '';
-    document.getElementById('coverInput').value = '';
-    document.getElementById('coverPreview').innerHTML = '<span>🖼️ Click để chọn ảnh</span>';
-  }
-
-  // ── Toast notification ───────────────────────────────────────────
-  function toast(msg, isError = false) {
-    const el = document.createElement('div');
-    el.className = 'toast' + (isError ? ' error' : '');
-    el.textContent = msg;
-    document.getElementById('toast-container').appendChild(el);
-    setTimeout(() => el.remove(), 3500);
-  }
-
-  // ── Utility ──────────────────────────────────────────────────────
-  function escHtml(str) {
-    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  // ── Auth helper: gắn JWT vào mọi request ─────────────────────────
-  function getAuthHeaders() {
-    const token = localStorage.getItem('bv_token');
-    return token ? { 'Authorization': 'Bearer ' + token } : {};
-  }
-
-  async function fetchWithAuth(url, options = {}) {
-    options.headers = { ...(options.headers || {}), ...getAuthHeaders() };
-    return fetch(url, options);
-  }
-
-  // ── Auth Nav: render header theo trạng thái đăng nhập ───────────
-  function initAuthNav() {
-    const token    = localStorage.getItem('bv_token');
-    const userName = localStorage.getItem('bv_userName');
-    const role     = localStorage.getItem('bv_role');
-    const nav      = document.getElementById('headerActions');
-
-    if (!token || !userName) {
-      // Chưa đăng nhập
-      nav.innerHTML = `
-        <a href="/login.html"    class="btn btn-ghost btn-sm">Đăng nhập</a>
-        <a href="/register.html" class="btn btn-primary btn-sm">Đăng ký</a>
-      `;
-    } else {
-      // Đã đăng nhập
-      const adminBtn = role === 'ROLE_ADMIN'
-        ? `<button class="btn btn-primary btn-sm" onclick="openAddModal()">＋ Thêm sách</button>`
-        : '';
-      nav.innerHTML = `
-        <div class="nav-user">
-          ${adminBtn}
-          <span class="nav-user-name"><span>👤</span>${escHtml(userName)}</span>
-          <button class="btn-logout" onclick="logout()">Đăng xuất</button>
-        </div>
-      `;
-    }
-  }
-
-  function logout() {
-    localStorage.removeItem('bv_token');
-    localStorage.removeItem('bv_userName');
-    localStorage.removeItem('bv_role');
-    localStorage.removeItem('bv_userId');
-    window.location.reload();
-  }
-
-  // Khởi tạo auth nav khi trang load
-  initAuthNav();
-
-</script>
+  <script src="/js/api.js"></script>
+  <script src="/js/index.js"></script>
 </body>
+
 </html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bảng điều khiển quản trị — Góc Của Vin Admin</title>
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="header"></header>
+
+  <main class="main-content">
+    <div class="container">
+      
+      <!-- Admin Header -->
+      <div style="text-align: center; margin: 1.75rem 0 2rem 0;">
+        <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; margin: 0;">Tổng quan hệ thống</h1>
+      </div>
+
+      <div class="admin-layout">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+          <a href="/admin/dashboard.html" class="admin-nav-item active">Tổng quan</a>
+          <a href="/admin/books.html" class="admin-nav-item">Quản lý sách & Kho</a>
+          <a href="/admin/orders.html" class="admin-nav-item">Quản lý đơn hàng</a>
+          <a href="/admin/users.html" class="admin-nav-item">Quản lý người dùng</a>
+          <div class="dropdown-divider" style="margin: 1rem 0;"></div>
+          <a href="/index.html" class="admin-nav-item">Xem trang bán hàng</a>
+        </aside>
+
+        <!-- Main Dashboard View -->
+        <section>
+          
+          <!-- Key Metric Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Doanh thu tháng này</div>
+              <div id="stat-monthly-revenue" class="stat-value" style="color: var(--ribbon-sage);">0 đ</div>
+              <div id="stat-month-period" style="font-size: 0.78rem; color: var(--ink-muted); margin-top: 0.25rem;">Tháng 08/2026</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-label">Doanh thu hôm nay</div>
+              <div id="stat-daily-revenue" class="stat-value" style="color: var(--ink);">0 đ</div>
+              <div id="stat-daily-paid" style="font-size: 0.78rem; color: var(--ink-muted); margin-top: 0.25rem;">0 đơn thành công</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-label">Tổng đơn toàn sàn</div>
+              <div id="stat-total-orders" class="stat-value">0</div>
+              <div style="font-size: 0.78rem; color: var(--ink-muted); margin-top: 0.25rem;">Đơn đã tạo</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-label">Đơn chờ xử lý</div>
+              <div id="stat-pending-orders" class="stat-value" style="color: var(--ribbon-marigold);">0</div>
+              <div style="font-size: 0.78rem; color: var(--ink-muted); margin-top: 0.25rem;">Cần chuẩn bị & giao</div>
+            </div>
+          </div>
+
+          <!-- Low Stock Warning Box -->
+          <div id="low-stock-panel" class="panel" style="margin-bottom: 2rem; border-left: 4px solid var(--ribbon-coral); display: none;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+              <h3 style="color: var(--ribbon-coral); font-size: 1.15rem; display: flex; align-items: center; gap: 0.4rem;">
+                 Cảnh báo sách sắp hết hàng (<span id="low-stock-count">0</span>)
+              </h3>
+              <a href="/admin/books.html" class="btn btn-outline btn-sm">Quản lý kho →</a>
+            </div>
+            <div id="low-stock-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem;">
+              <!-- Low stock items rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Recent Orders Preview -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Đơn hàng mới nhất</h3>
+              <a href="/admin/orders.html" class="btn btn-secondary btn-sm">Xem tất cả đơn →</a>
+            </div>
+
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Thời gian</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-orders-table-body">
+                  <tr><td colspan="6" style="text-align: center; padding: 2rem;">Đang tải đơn hàng...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <span>© 2026 Góc Của Vin Admin Portal.</span>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/admin-dashboard.js"></script>
+</body>
+</html>

@@ -42,7 +42,11 @@ public enum ErrorCode {
     PAYMENT_ALREADY_PROCESSED("PAYMENT_ALREADY_PROCESSED", "Đơn hàng đã được thanh toán", HttpStatus.CONFLICT),
 
     // Profile
-    CURRENT_PASSWORD_REQUIRED("CURRENT_PASSWORD_REQUIRED", "Vui lòng nhập mật khẩu hiện tại để đổi mật khẩu mới", HttpStatus.BAD_REQUEST);
+    CURRENT_PASSWORD_REQUIRED("CURRENT_PASSWORD_REQUIRED", "Vui lòng nhập mật khẩu hiện tại để đổi mật khẩu mới", HttpStatus.BAD_REQUEST),
+    PASSWORD_MISMATCH("PASSWORD_MISMATCH", "Mật khẩu mới và xác nhận mật khẩu không khớp", HttpStatus.BAD_REQUEST),
+
+    // Review
+    REVIEW_NOT_FOUND("REVIEW_NOT_FOUND", "Không tìm thấy bình luận / đánh giá", HttpStatus.NOT_FOUND);
 
     private final String code;
     private final String message;

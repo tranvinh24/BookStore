@@ -44,6 +44,16 @@ public class User implements UserDetails {
     /** Số điện thoại — tùy chọn */
     private String sdt;
 
+    /** Tên hiển thị (khác với userName dùng để đăng nhập) */
+    @Column(length = 150)
+    private String fullName;
+
+    /** Ngày sinh */
+    private LocalDate dateOfBirth;
+
+    /** Đường dẫn ảnh đại diện (avatarPath) — lưu dưới dạng path tương đối */
+    private String avatarPath;
+
     @Column(updatable = false)
     private LocalDate createdAt;
 

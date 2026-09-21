@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Xem hồ sơ cá nhân — Góc Của Vin</title>
+  <meta name="description" content="Xem và chỉnh sửa hồ sơ cá nhân, đổi mật khẩu trên Góc Của Vin." />
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    /* ─── Layout ─── */
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 2rem;
+      align-items: start;
+      margin-top: 2rem;
+    }
+    @media (max-width: 768px) {
+      .profile-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Left sidebar ─── */
+    .profile-sidebar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      position: sticky;
+      top: 100px;
+    }
+    .avatar-wrapper {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 1rem;
+    }
+    .avatar-img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary);
+    }
+    .avatar-initial {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      color: #fff;
+      font-size: 2.4rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid var(--primary);
+    }
+    .sidebar-username {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0 0 0.2rem;
+      color: var(--ink);
+    }
+    .sidebar-fullname {
+      font-size: 0.88rem;
+      color: var(--ink-secondary);
+      margin-bottom: 0.75rem;
+    }
+    .sidebar-nav {
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .sidebar-nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.65rem 1rem;
+      border-radius: var(--radius-md);
+      border: none;
+      background: transparent;
+      color: var(--ink-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s, color 0.15s;
+      width: 100%;
+    }
+    .sidebar-nav-btn:hover {
+      background: var(--surface-hover);
+      color: var(--ink);
+    }
+    .sidebar-nav-btn.active {
+      background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(167,139,250,0.12));
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .sidebar-nav-btn svg {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+    }
+    .sidebar-info {
+      margin-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+      text-align: left;
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+    }
+    .sidebar-info p { margin: 0.3rem 0; }
+
+    /* ─── Right panel ─── */
+    .profile-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+    }
+    .panel-section { display: none; }
+    .panel-section.active { display: block; }
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0 0 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--primary);
+      color: var(--ink);
+    }
+
+    /* ─── Avatar change row ─── */
+    .avatar-edit-row {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: var(--surface-2, #f8f8fc);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+    .avatar-preview {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+      flex-shrink: 0;
+    }
+    .avatar-preview-initial {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      color: #fff;
+      font-size: 1.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .avatar-edit-info { flex: 1; }
+    .avatar-edit-info h4 { margin: 0 0 0.25rem; font-size: 0.95rem; }
+    .avatar-edit-info p { margin: 0; font-size: 0.82rem; color: var(--ink-muted); }
+    .btn-avatar-upload {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1rem;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-avatar-upload:hover { opacity: 0.88; }
+    #avatar-file-input { display: none; }
+
+    /* ─── Form fields ─── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* ─── Toast notification ─── */
+    .profile-toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      padding: 0.8rem 1.4rem;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 500;
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+    }
+    .profile-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .profile-toast.success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .profile-toast.error   { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .profile-toast.info    { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
+
+    /* ─── Password strength ─── */
+    .password-strength {
+      height: 4px;
+      border-radius: 2px;
+      margin-top: 0.4rem;
+      transition: width 0.3s, background 0.3s;
+    }
+    .strength-weak   { background: #ef4444; width: 33%; }
+    .strength-medium { background: #f59e0b; width: 66%; }
+    .strength-strong { background: #22c55e; width: 100%; }
+  </style>
+</head>
+<body>
+  <header class="header"></header>
+
+  <main class="main-content">
+    <div class="container" style="max-width: 960px;">
+      <div style="text-align: center; margin: 1.75rem 0 2.5rem 0;">
+        <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; margin: 0;">Xem hồ sơ cá nhân</h1>
+      </div>
+
+      <div class="profile-layout">
+
+        <!-- ── Left Sidebar ── -->
+        <aside class="profile-sidebar">
+          <div class="avatar-wrapper">
+            <div id="sidebar-avatar-initial" class="avatar-initial">U</div>
+            <img id="sidebar-avatar-img" class="avatar-img" src="" alt="Avatar" style="display:none;" />
+          </div>
+          <p class="sidebar-username" id="sidebar-username">Đang tải...</p>
+          <p class="sidebar-fullname" id="sidebar-fullname">–</p>
+          <div id="sidebar-role-badge">
+            <span class="ribbon ribbon-sage">Thành viên</span>
+          </div>
+
+          <nav class="sidebar-nav">
+            <button class="sidebar-nav-btn active" id="btn-nav-info" onclick="switchTab('info')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+              Chỉnh sửa hồ sơ cá nhân
+            </button>
+            <button class="sidebar-nav-btn" id="btn-nav-password" onclick="switchTab('password')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              Đổi mật khẩu
+            </button>
+          </nav>
+
+          <div class="sidebar-info">
+            <p>Mã tài khoản: <strong id="sidebar-id">–</strong></p>
+            <p>Ngày tham gia: <strong id="sidebar-created">–</strong></p>
+          </div>
+        </aside>
+
+        <!-- ── Right Panel ── -->
+        <div class="profile-panel">
+
+          <!-- Tab: Chỉnh sửa hồ sơ -->
+          <div id="tab-info" class="panel-section active">
+            <h2 class="section-title">Chỉnh sửa hồ sơ cá nhân</h2>
+
+            <!-- Avatar change -->
+            <div class="avatar-edit-row">
+              <div id="info-avatar-initial" class="avatar-preview-initial">U</div>
+              <img id="info-avatar-img" class="avatar-preview" src="" alt="Avatar" style="display:none;" />
+              <div class="avatar-edit-info">
+                <h4>Ảnh đại diện</h4>
+                <p>Hỗ trợ: JPG, PNG, WebP, GIF. Tối đa 5 MB.</p>
+              </div>
+              <div>
+                <input type="file" id="avatar-file-input" accept="image/*" />
+                <button class="btn-avatar-upload" onclick="document.getElementById('avatar-file-input').click()">
+                  Đổi ảnh đại diện
+                </button>
+              </div>
+            </div>
+
+            <form id="form-info" novalidate>
+              <div class="form-row">
+                <div class="field">
+                  <label class="field-label" for="field-fullname">Họ và tên hiển thị</label>
+                  <input type="text" id="field-fullname" class="field-input" placeholder="Ví dụ: Nguyễn Văn A" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="field-email">Địa chỉ Email</label>
+                  <input type="email" id="field-email" class="field-input" placeholder="email@domain.com" />
+                  <div id="email-error" class="field-error"></div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="field">
+                  <label class="field-label" for="field-sdt">Số điện thoại</label>
+                  <input type="tel" id="field-sdt" class="field-input" placeholder="Ví dụ: 0901234567" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="field-dob">Ngày sinh</label>
+                  <input type="date" id="field-dob" class="field-input" />
+                </div>
+              </div>
+
+              <div id="info-general-error" class="field-error" style="margin-bottom:1rem;"></div>
+
+              <div style="text-align: right; margin-top: 1.5rem;">
+                <button type="submit" id="btn-save-info" class="btn btn-primary btn-lg">
+                  Lưu thay đổi
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Tab: Đổi mật khẩu -->
+          <div id="tab-password" class="panel-section">
+            <h2 class="section-title">Đổi mật khẩu</h2>
+
+            <form id="form-password" novalidate>
+              <div class="field">
+                <label class="field-label" for="field-new-password">Mật khẩu mới</label>
+                <input type="password" id="field-new-password" class="field-input"
+                       placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
+                       oninput="checkPasswordStrength(this.value)" />
+                <div id="strength-bar" class="password-strength" style="display:none;"></div>
+                <div id="strength-label" style="font-size:0.8rem; margin-top:0.25rem; color: var(--ink-muted);"></div>
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="field-confirm-password">Xác nhận mật khẩu mới</label>
+                <input type="password" id="field-confirm-password" class="field-input"
+                       placeholder="Nhập lại mật khẩu mới" />
+                <div id="confirm-error" class="field-error"></div>
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="field-current-password">Mật khẩu hiện tại</label>
+                <input type="password" id="field-current-password" class="field-input"
+                       placeholder="Nhập mật khẩu đang sử dụng để xác nhận" />
+                <div class="field-hint">Bắt buộc nhập để xác minh danh tính trước khi đổi mật khẩu.</div>
+              </div>
+
+              <div id="pw-general-error" class="field-error" style="margin-bottom:1rem;"></div>
+
+              <div style="text-align: right; margin-top: 1.5rem;">
+                <button type="submit" id="btn-save-password" class="btn btn-primary btn-lg">
+                  Đổi mật khẩu
+                </button>
+              </div>
+            </form>
+          </div>
+
+        </div><!-- /profile-panel -->
+      </div><!-- /profile-layout -->
+    </div><!-- /container -->
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <span>© 2026 Góc Của Vin. Nền tảng sách trực tuyến.</span>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div id="profile-page-toast" class="profile-toast"></div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/profile.js"></script>
+</body>
+</html>

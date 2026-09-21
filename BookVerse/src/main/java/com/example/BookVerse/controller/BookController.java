@@ -2,6 +2,7 @@ package com.example.BookVerse.controller;
 
 import com.example.BookVerse.dto.request.BookCreateRequest;
 import com.example.BookVerse.dto.request.BookUpdateRequest;
+import com.example.BookVerse.dto.response.BookImportResult;
 import com.example.BookVerse.dto.response.BookPageResponse;
 import com.example.BookVerse.dto.response.BookRespone;
 import com.example.BookVerse.service.BookService;
@@ -193,5 +194,32 @@ public class BookController {
             @PathVariable String id,
             @RequestParam(defaultValue = "medium") String size) {
         return bookService.getCoverFile(id, size);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // POST /api/books/import — Nhập sách hàng loạt qua file XLSX / CSV
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * POST /api/books/import (Content-Type: multipart/form-data)
+     * Nhập danh sách sách từ file Excel (.xlsx, .xls) hoặc CSV (.csv).
+     */
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BookImportResult> importBooks(@RequestParam("file") MultipartFile file) {
+        BookImportResult result = bookService.importBooks(file);
+        return ResponseEntity.ok(result);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // GET /api/books/template — Tải file mẫu nhập sách
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * GET /api/books/template?format=xlsx | csv
+     * Tải file mẫu nhập sách chuẩn.
+     */
+    @GetMapping("/template")
+    public ResponseEntity<Resource> downloadTemplate(@RequestParam(defaultValue = "xlsx") String format) {
+        return bookService.generateTemplate(format);
     }
 }

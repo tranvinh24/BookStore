@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Danh sách yêu thích — Góc Của Vin</title>
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="header"></header>
+
+  <main class="main-content">
+    <div class="container">
+      <div style="text-align: center; margin: 1.75rem 0 2.5rem 0;">
+        <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; margin: 0;">Danh sách yêu thích</h1>
+      </div>
+
+      <div id="wishlist-loading" class="panel" style="text-align: center; padding: 3rem;">
+        <p>Đang tải danh sách yêu thích...</p>
+      </div>
+
+      <!-- Empty state -->
+      <div id="wishlist-empty" class="panel" style="display: none; text-align: center; padding: 4rem 2rem;">
+        <h3>Danh sách yêu thích đang trống</h3>
+        <p style="margin-top: 0.4rem; color: var(--text-secondary); max-width: 400px; margin-left: auto; margin-right: auto;">
+          Hãy bấm biểu tượng trái tim ở bất kỳ cuốn sách nào để lưu lại danh sách này nhé!
+        </p>
+        <a href="/index.html" class="btn btn-primary" style="margin-top: 1.25rem;">Khám phá sách ngay</a>
+      </div>
+
+      <!-- Grid of Wishlist items -->
+      <div id="wishlist-grid" class="books-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <span>© 2026 Góc Của Vin. Nền tảng sách trực tuyến.</span>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/wishlist.js"></script>
+</body>
+</html>
