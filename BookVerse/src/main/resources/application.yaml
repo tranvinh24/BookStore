@@ -7,7 +7,7 @@ spring:
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/bookstore}
     username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD}
+    password: ${DB_PASSWORD:}
   jpa:
     hibernate:
       ddl-auto: update
@@ -33,14 +33,14 @@ app:
 
 # Cloudinary — lưu ảnh trên cloud (không phụ thuộc local disk)
 cloudinary:
-  cloud-name: ${CLOUDINARY_CLOUD_NAME:f4pavz46}
-  api-key: ${CLOUDINARY_API_KEY:885553474513991}
-  api-secret: ${CLOUDINARY_API_SECRET:rGvn7paVYh8-3GgmiQb8LqPbYvg}
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+  api-key: ${CLOUDINARY_API_KEY:}
+  api-secret: ${CLOUDINARY_API_SECRET:}
 
 # Cấu hình cổng thanh toán VNPay Sandbox
 vnpay:
-  tmn-code: ${VNPAY_TMN_CODE:NQC9OREC}
-  hash-secret: ${VNPAY_HASH_SECRET:EJLIBJTMOLGURBAJNAYYYANBRIQITFFU}
+  tmn-code: ${VNPAY_TMN_CODE:}
+  hash-secret: ${VNPAY_HASH_SECRET:}
   pay-url: ${VNPAY_PAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
   return-url: ${VNPAY_RETURN_URL:http://localhost:8080/payment.html}
 

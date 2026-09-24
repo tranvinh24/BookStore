@@ -31,6 +31,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:" + projectRoot + "/uploads/avatars/");
     }
 
+    @Override
+    public void addViewControllers(org.springframework.web.servlet.config.annotation.ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/swagger-ui", "/swagger-ui/index.html");
+    }
+
     private String resolveProjectRoot() {
         try {
             Path classLocation = Paths.get(

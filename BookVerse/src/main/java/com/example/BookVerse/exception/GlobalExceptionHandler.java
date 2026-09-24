@@ -12,6 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,6 +27,7 @@ import java.util.Map;
  * Controller Advice tập trung xử lý toàn bộ exception trong ứng dụng.
  */
 @Slf4j
+@Hidden
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

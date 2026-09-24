@@ -1319,31 +1319,331 @@ h4 { font-size: 1.05rem; }
   font-size: 0.82rem;
 }
 
-/* Responsive */
+/* ==========================================================================
+   Comprehensive Mobile & Tablet Responsive Design
+   ========================================================================== */
+
+/* ─── Tablet & Small Laptop (<= 1024px) ─── */
 @media (max-width: 1024px) {
   .catalog-layout, .admin-layout { grid-template-columns: 1fr; }
-  .footer-grid { grid-template-columns: 1fr 1fr; }
-  .hero-banner-card { grid-template-columns: 1fr; }
-  .books-grid { grid-template-columns: repeat(3, 1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .hero-banner-card { grid-template-columns: 1fr; padding: 2rem; }
+  .books-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 }
 
+/* ─── Mobile Landscape & Tablet (<= 768px) ─── */
 @media (max-width: 768px) {
+  /* Header & Navigation */
+  .top-bar-inner {
+    flex-direction: column;
+    gap: 0.2rem;
+    text-align: center;
+  }
   .header-main {
     flex-wrap: wrap;
     height: auto;
-    padding: 0.75rem 0;
+    padding: 0.75rem 0 0.5rem;
+    gap: 0.75rem;
+  }
+  .brand {
+    font-size: 1.35rem;
+  }
+  .brand-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 1.1rem;
   }
   .header-search {
     order: 3;
     max-width: 100%;
     width: 100%;
+    margin-top: 0.25rem;
   }
+  .header-search-input {
+    padding: 0.55rem 0.85rem;
+    font-size: 0.9rem;
+  }
+  .header-search-btn {
+    padding: 0 1.1rem;
+    font-size: 0.85rem;
+  }
+  .header-actions {
+    gap: 0.75rem;
+  }
+  .action-text {
+    display: none !important; /* Hide labels on mobile, keep clean touchable icon circles */
+  }
+  .action-icon-circle {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+  }
+
+  /* Nav Links Horizontal Touch Scroll */
+  .nav-bar {
+    height: 44px;
+    overflow: hidden;
+  }
+  .nav-bar-inner {
+    gap: 0.85rem;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav-bar-inner::-webkit-scrollbar {
+    display: none;
+  }
+  .nav-links {
+    gap: 1.25rem;
+    flex-shrink: 0;
+  }
+  .nav-category-btn {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.82rem;
+  }
+
+  /* Banner Carousel */
+  .banner-carousel {
+    aspect-ratio: 16 / 9;
+    max-height: 260px;
+    border-radius: var(--radius-sm);
+  }
+  .carousel-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+  .carousel-btn-prev { left: 8px; }
+  .carousel-btn-next { right: 8px; }
+  .carousel-dots { bottom: 8px; gap: 6px; }
+  .carousel-dot { width: 8px; height: 8px; }
+  .carousel-dot.active { width: 20px; }
+
+  /* Books Grid */
   .books-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
   }
-  .book-card-cover { height: 190px; }
-  .footer-grid { grid-template-columns: 1fr; }
+  .book-card {
+    padding: 0.65rem;
+  }
+  .book-card-cover {
+    height: 180px;
+    margin-bottom: 0.5rem;
+  }
+  .book-card-title {
+    font-size: 0.88rem;
+    height: 2.4rem;
+    line-height: 1.3;
+  }
+  .book-card-author {
+    font-size: 0.78rem;
+    margin-bottom: 0.35rem;
+  }
+  .book-price {
+    font-size: 1.05rem;
+  }
+  .book-card-actions .btn {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.78rem;
+  }
+
+  /* Stepper */
+  .stepper {
+    margin: 1.25rem 0;
+  }
+  .stepper::before {
+    left: 15px;
+    right: 15px;
+    top: 15px;
+  }
+  .step-item {
+    width: auto;
+    flex: 1;
+  }
+  .step-circle {
+    width: 30px;
+    height: 30px;
+    font-size: 0.78rem;
+    margin-bottom: 0.25rem;
+  }
+  .step-title {
+    font-size: 0.7rem;
+  }
+
+  /* Admin Layout */
+  .admin-sidebar {
+    position: static;
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+  .admin-nav-item {
+    margin-bottom: 0;
+    flex-shrink: 0;
+    padding: 0.5rem 0.85rem;
+  }
+
+  /* Footer */
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    gap: 0.6rem;
+    text-align: center;
+  }
+
+  /* Notifications Dropdown */
+  .notify-dropdown-menu {
+    width: 320px !important;
+    max-width: 95vw;
+    right: -60px;
+  }
+}
+
+/* ─── Mobile Portrait (<= 576px) ─── */
+@media (max-width: 576px) {
+  html {
+    font-size: 14px;
+  }
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  .main-content {
+    padding: 1rem 0 2.5rem;
+  }
+
+  /* Header adjustments for small phones */
+  .header-main {
+    padding: 0.5rem 0 0.4rem;
+  }
+  .brand {
+    font-size: 1.2rem;
+  }
+  .header-search-btn span {
+    display: none; /* Icon only on phones to save space */
+  }
+  .header-search-btn {
+    padding: 0 0.9rem;
+  }
+
+  /* Book Grid 2-column mobile layout */
+  .books-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  .book-card {
+    padding: 0.5rem;
+  }
+  .book-card-cover {
+    height: 155px;
+  }
+  .book-card-corner-ribbon {
+    top: 4px;
+    left: 4px;
+    transform: scale(0.85);
+    transform-origin: top left;
+  }
+  .book-card-title {
+    font-size: 0.82rem;
+    height: 2.2rem;
+  }
+  .book-price {
+    font-size: 0.95rem;
+  }
+
+  /* Detail Page */
+  .detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .cover-box {
+    max-width: 280px;
+    margin: 0 auto 1.5rem;
+  }
+  .price-box {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+  #book-price {
+    font-size: 1.7rem !important;
+  }
+
+  /* Cart Layout */
+  .cart-item-row {
+    grid-template-columns: 60px 1fr !important;
+    gap: 0.65rem !important;
+  }
+  .cart-item-thumb {
+    width: 60px;
+    height: 80px;
+  }
+  .checkout-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* My Orders */
+  .order-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.85rem 1rem;
+  }
+  .order-card-body {
+    padding: 1rem;
+  }
+  .order-info-grid {
+    grid-template-columns: 1fr !important;
+    padding: 0.75rem 0.85rem;
+  }
+  .order-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+  }
+  .order-footer-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* Profile Layout */
+  .profile-layout {
+    grid-template-columns: 1fr !important;
+    margin-top: 1rem;
+  }
+  .avatar-edit-row {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  /* Modals & Dialogs */
+  .modal-dialog {
+    width: 95%;
+    padding: 1.15rem 1rem;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Toast notification */
+  .toast-container {
+    left: 12px;
+    right: 12px;
+    bottom: 16px;
+    width: auto;
+  }
+  .toast {
+    min-width: 0;
+    max-width: 100%;
+  }
 }
 
 /* Catalog Showcase Sections */
