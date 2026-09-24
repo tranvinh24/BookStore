@@ -17,6 +17,10 @@ spring:
       enabled: true
       max-file-size: 20MB       # Giới hạn mỗi file upload
       max-request-size: 25MB    # Giới hạn toàn bộ request
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=60m
 
 # Cấu hình thư mục upload và các tùy chọn của ứng dụng
 app:
@@ -26,6 +30,12 @@ app:
   jwt:
     secret: ${JWT_SECRET:dGhpcyBpcyBhIHZlcnkgbG9uZyBzZWNyZXQga2V5IGZvciBib29rdmVyc2UgYXBwbGljYXRpb24h}
     expiration: 86400000   # 24 giờ tính theo milliseconds
+
+# Cloudinary — lưu ảnh trên cloud (không phụ thuộc local disk)
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:f4pavz46}
+  api-key: ${CLOUDINARY_API_KEY:885553474513991}
+  api-secret: ${CLOUDINARY_API_SECRET:rGvn7paVYh8-3GgmiQb8LqPbYvg}
 
 # Cấu hình cổng thanh toán VNPay Sandbox
 vnpay:

@@ -12,15 +12,17 @@ import com.example.BookVerse.exception.ErrorCode;
 import com.example.BookVerse.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,11 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -59,6 +56,9 @@ public class BookService {
      * @param request   Thông tin sách từ client
      * @param coverFile File ảnh bìa (tùy chọn)
      */
+    @Caching(evict = {
+            @CacheEvict(value = "categories", allEntries = true)
+    })
     @Transactional
     public BookRespone addBook(BookCreateRequest request, MultipartFile coverFile) {
         Book book = bookMapper.toBook(request);
@@ -81,6 +81,7 @@ public class BookService {
     /**
      * Lấy thông tin chi tiết một sách theo ID.
      */
+    @Cacheable(value = "books", key = "#id")
     public BookRespone getBook(String id) {
         Book book = findBookOrThrow(id);
         return bookMapper.toBookRespone(book);
@@ -105,6 +106,7 @@ public class BookService {
     }
 
     /** Lấy danh sách tất cả thể loại sách có trong hệ thống */
+    @Cacheable(value = "categories", key = "'all'")
     public List<String> getCategories() {
         return bookRepository.findAllCategories();
     }
@@ -131,6 +133,10 @@ public class BookService {
     /**
      * Cập nhật thông tin sách, có thể thay ảnh bìa mới.
      */
+    @Caching(evict = {
+            @CacheEvict(value = "books",      key = "#id"),
+            @CacheEvict(value = "categories", allEntries = true)
+    })
     @Transactional
     public BookRespone updateBook(String id, BookUpdateRequest request, MultipartFile coverFile) {
         Book book = findBookOrThrow(id);
@@ -157,6 +163,10 @@ public class BookService {
     /**
      * Xóa sách và toàn bộ ảnh bìa liên quan.
      */
+    @Caching(evict = {
+            @CacheEvict(value = "books",      key = "#id"),
+            @CacheEvict(value = "categories", allEntries = true)
+    })
     @Transactional
     public void deleteBook(String id) {
         Book book = findBookOrThrow(id);
@@ -170,45 +180,23 @@ public class BookService {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Lấy file ảnh bìa và stream về client.
+     * Lấy URL ảnh bìa từ Cloudinary và redirect về.
+     * Trả về 302 redirect thay vì stream file — browser tự load từ Cloudinary.
      *
      * @param id   ID sách
      * @param size Kích thước: "thumbnail", "medium", "large"
      */
-    public ResponseEntity<Resource> getCoverFile(String id, String size) {
+    public ResponseEntity<Void> getCoverUrl(String id, String size) {
         Book book = findBookOrThrow(id);
 
         if (book.getCoverPath() == null || book.getCoverPath().isBlank()) {
             throw new AppException(ErrorCode.FILE_NOT_FOUND, "Sách này chưa có ảnh bìa");
         }
 
-        Path imagePath = imageService.resolveImagePath(book.getCoverPath(), size);
-        Resource resource = new FileSystemResource(imagePath);
-
-        if (!resource.exists()) {
-            throw new AppException(ErrorCode.FILE_NOT_FOUND, "File ảnh không tồn tại trên server");
-        }
-
-        // Dùng Last-Modified từ file thực tế để browser tái validate mỗi lần.
-        // Tránh dùng max-age cố định vì khi admin cập nhật ảnh, browser sẽ dùng cache cũ.
-        try {
-            long lastModifiedMillis = Files.getLastModifiedTime(imagePath).toMillis();
-            String lastModified = DateTimeFormatter.RFC_1123_DATE_TIME.format(
-                    ZonedDateTime.ofInstant(
-                            java.time.Instant.ofEpochMilli(lastModifiedMillis),
-                            ZoneOffset.UTC));
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .cacheControl(CacheControl.noCache())   // buộc browser tái validate
-                    .header(HttpHeaders.LAST_MODIFIED, lastModified)
-                    .body(resource);
-        } catch (IOException e) {
-            log.warn("Không đọc được last-modified của file ảnh: {}", imagePath);
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .cacheControl(CacheControl.noCache())
-                    .body(resource);
-        }
+        String cloudinaryUrl = imageService.resolveImageUrl(book.getCoverPath(), size);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header(HttpHeaders.LOCATION, cloudinaryUrl)
+                .build();
     }
 
     // ─────────────────────────────────────────────────────────────

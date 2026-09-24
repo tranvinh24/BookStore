@@ -8,8 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notifications")
-@Getter
-@Setter
+@Data
 @EqualsAndHashCode(of = "id")
 @ToString(exclude = {"user"})
 @Builder

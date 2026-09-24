@@ -190,10 +190,10 @@ public class BookController {
      * @param size thumbnail (200px) | medium (500px) | large (1200px)
      */
     @GetMapping("/{id}/cover")
-    public ResponseEntity<Resource> getCover(
+    public ResponseEntity<Void> getCover(
             @PathVariable String id,
             @RequestParam(defaultValue = "medium") String size) {
-        return bookService.getCoverFile(id, size);
+        return bookService.getCoverUrl(id, size);
     }
 
     // ─────────────────────────────────────────────────────────────

@@ -20,6 +20,8 @@ import com.example.BookVerse.repository.UserRepository;
 import com.example.BookVerse.Mapper.BookMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -88,6 +90,7 @@ public class AdminService {
      * Khi CANCELLED: tu dong hoan tra so luong ton kho cho tung sach.
      * Khi DELIVERED hoac PAID: tu dong xac nhan payment = SUCCESS va cap nhat paidAt (dam bao doanh thu duoc tinh).
      */
+    @CacheEvict(value = "revenue", allEntries = true)
     @Transactional
     public OrderSummaryResponse updateOrderStatus(String orderId, UpdateOrderStatusRequest request) {
         Order order = orderRepository.findById(orderId)
@@ -244,6 +247,7 @@ public class AdminService {
      * Thong ke doanh thu theo thang (format: yyyy-MM).
      * Neu month = null -> dung thang hien tai.
      */
+    @Cacheable(value = "revenue", key = "'monthly:' + #month")
     public RevenueResponse getMonthlyRevenue(String month) {
         YearMonth ym = (month != null && !month.isBlank())
                 ? YearMonth.parse(month)
@@ -259,6 +263,7 @@ public class AdminService {
      * Thong ke doanh thu theo ngay (format: yyyy-MM-dd).
      * Neu date = null -> dung ngay hom nay.
      */
+    @Cacheable(value = "revenue", key = "'daily:' + #date")
     public RevenueResponse getDailyRevenue(String date) {
         LocalDate day = (date != null && !date.isBlank())
                 ? LocalDate.parse(date)

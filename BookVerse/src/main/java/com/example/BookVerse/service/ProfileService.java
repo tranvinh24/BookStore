@@ -1,6 +1,5 @@
 package com.example.BookVerse.service;
 
-import com.example.BookVerse.config.AppProperties;
 import com.example.BookVerse.dto.request.ChangePasswordRequest;
 import com.example.BookVerse.dto.request.UpdateProfileRequest;
 import com.example.BookVerse.dto.response.UserResponse;
@@ -10,7 +9,9 @@ import com.example.BookVerse.exception.ErrorCode;
 import com.example.BookVerse.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.coobird.thumbnailator.Thumbnails;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -31,14 +30,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProfileService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AppProperties appProperties;
+    private final UserRepository    userRepository;
+    private final PasswordEncoder   passwordEncoder;
+    private final CloudinaryService cloudinaryService;
 
     private static final List<String> ALLOWED_IMAGE_TYPES =
             List.of("image/jpeg", "image/png", "image/webp", "image/gif");
 
     /** Lấy thông tin cá nhân user hiện tại */
+    @Cacheable(value = "profiles", key = "#userId")
     public UserResponse getProfile(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -46,6 +46,10 @@ public class ProfileService {
     }
 
     /** Cập nhật thông tin hồ sơ cá nhân (fullName, email, sdt, dateOfBirth) */
+    @Caching(evict = {
+            @CacheEvict(value = "profiles",    key = "#userId"),
+            @CacheEvict(value = "userDetails", key = "#result.userName")
+    })
     @Transactional
     public UserResponse updateProfile(String userId, UpdateProfileRequest request) {
         User user = userRepository.findById(userId)
@@ -75,6 +79,10 @@ public class ProfileService {
     }
 
     /** Đổi mật khẩu — yêu cầu nhập đúng mật khẩu hiện tại */
+    @Caching(evict = {
+            @CacheEvict(value = "profiles",    key = "#userId"),
+            @CacheEvict(value = "userDetails", allEntries = true)
+    })
     @Transactional
     public void changePassword(String userId, ChangePasswordRequest request) {
         User user = userRepository.findById(userId)
@@ -93,7 +101,8 @@ public class ProfileService {
         log.info("User {} đổi mật khẩu thành công", userId);
     }
 
-    /** Upload ảnh đại diện — resize thành 300x300 và lưu vào disk */
+    /** Upload ảnh đại diện lên Cloudinary */
+    @CacheEvict(value = "profiles", key = "#userId")
     @Transactional
     public UserResponse uploadAvatar(String userId, MultipartFile file) throws IOException {
         User user = userRepository.findById(userId)
@@ -104,35 +113,17 @@ public class ProfileService {
             throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
         }
 
-        // Đọc ảnh gốc
         BufferedImage original = ImageIO.read(file.getInputStream());
         if (original == null) {
             throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
         }
 
-        // Thư mục avatars độc lập, không lồng trong covers
-        // Resolve tương tự AppProperties nhưng dùng „uploads/avatars“
-        Path avatarBaseDir = resolveAvatarBaseDir();
-        Files.createDirectories(avatarBaseDir);
-
-        // Dùng userId làm tên file — đượng dẫn luôn đồng nhất, không phụ thuộc ngày tháng
-        String fileName = userId + ".jpg";
-        Path outputPath = avatarBaseDir.resolve(fileName);
-
-        // Resize thành 300x300 (crop center)
-        Thumbnails.of(original)
-                .size(300, 300)
-                .crop(net.coobird.thumbnailator.geometry.Positions.CENTER)
-                .outputFormat("jpg")
-                .outputQuality(0.9)
-                .toFile(outputPath.toFile());
-
-        // Lưu URL tĩnh vào DB — browser có thể load trực tiếp mà không cần JWT
-        String staticUrl = "/uploads/avatars/" + fileName;
-        user.setAvatarPath(staticUrl);
+        // Upload lên Cloudinary — trả về URL công khai
+        String avatarUrl = cloudinaryService.uploadAvatar(original, userId);
+        user.setAvatarPath(avatarUrl);
         userRepository.save(user);
 
-        log.info("User {} cập nhật avatar thành công: {}", userId, outputPath.toAbsolutePath());
+        log.info("User {} cập nhật avatar thành công: {}", userId, avatarUrl);
         return toUserResponse(user);
     }
 
@@ -151,24 +142,4 @@ public class ProfileService {
                 .build();
     }
 
-    /**
-     * Resolve thư mục vật lý của uploads/avatars.
-     * Tương tự AppProperties.getAbsoluteUploadDir() nhưng trỏ về uploads/avatars.
-     */
-    private Path resolveAvatarBaseDir() {
-        try {
-            Path classLocation = java.nio.file.Paths.get(
-                AppProperties.class.getProtectionDomain().getCodeSource().getLocation().toURI()
-            );
-            Path root = classLocation.getParent();
-            if (root.endsWith("classes")) {
-                root = root.getParent().getParent();
-            } else {
-                root = root.getParent();
-            }
-            return root.resolve("uploads/avatars").normalize();
-        } catch (Exception e) {
-            return java.nio.file.Paths.get(System.getProperty("user.dir")).resolve("uploads/avatars");
-        }
-    }
 }
