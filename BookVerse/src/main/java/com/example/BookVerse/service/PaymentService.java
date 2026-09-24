@@ -67,7 +67,14 @@ public class PaymentService {
         vnpParams.put("vnp_OrderInfo", "Thanh toan don hang " + order.getId());
         vnpParams.put("vnp_OrderType", "other");
         vnpParams.put("vnp_Locale", "vn");
-        vnpParams.put("vnp_ReturnUrl", vnPayConfig.getReturnUrl());
+        String returnUrl = vnPayConfig.getReturnUrl();
+        String forwardedHost = request.getHeader("X-Forwarded-Host");
+        if (forwardedHost != null && !forwardedHost.isBlank() && returnUrl != null && returnUrl.contains("localhost")) {
+            String proto = request.getHeader("X-Forwarded-Proto");
+            if (proto == null || proto.isBlank()) proto = "https";
+            returnUrl = proto + "://" + forwardedHost.split(",")[0].trim() + "/payment.html";
+        }
+        vnpParams.put("vnp_ReturnUrl", returnUrl);
         vnpParams.put("vnp_IpAddr", VNPayConfig.getIpAddress(request));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
