@@ -18,7 +18,10 @@ import java.util.List;
  */
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
+@ToString(of = {"id", "userName", "email", "role"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

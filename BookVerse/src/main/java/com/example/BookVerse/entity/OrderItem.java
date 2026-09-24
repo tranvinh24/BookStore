@@ -5,7 +5,10 @@ import lombok.*;
 
 @Entity
 @Table(name = "order_item")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
+@ToString(exclude = {"order", "book"})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

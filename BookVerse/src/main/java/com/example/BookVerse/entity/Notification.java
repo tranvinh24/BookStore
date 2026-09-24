@@ -1,52 +1,52 @@
 package com.example.BookVerse.entity;
 
+import com.example.BookVerse.enums.NotificationType;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "reviews")
+@Table(name = "notifications")
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = {"book", "user"})
+@ToString(exclude = {"user"})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Review {
+public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id", nullable = false)
-    private Book book;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false, length = 200)
+    private String title;
+
+    @Column(nullable = false, length = 500)
+    private String message;
+
+    private String orderId;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Integer rating;
+    @Builder.Default
+    private NotificationType type = NotificationType.ORDER;
 
-    @Column(nullable = false, length = 2000)
-    private String comment;
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean isRead = false;
 
-    @Column(updatable = false)
+    @Column(nullable = false)
     private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
     }
 }

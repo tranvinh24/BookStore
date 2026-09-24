@@ -5,7 +5,10 @@ import lombok.*;
 
 @Entity
 @Table(name = "cart_item")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
+@ToString(exclude = {"cart", "book"})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

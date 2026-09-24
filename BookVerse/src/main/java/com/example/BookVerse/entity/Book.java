@@ -1,28 +1,34 @@
 package com.example.BookVerse.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
-@Data
+@Table(name = "book")
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
+@ToString(of = {"id", "title", "author", "isbn"})
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Book {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+
     private String title;
     private String author;
     private String isbn;
     private Integer year;
     private String category;
     private Double rating;
+
+    /** Lưu dạng TEXT để hỗ trợ mô tả dài hơn 255 ký tự */
+    @Column(columnDefinition = "TEXT")
     private String description;
+
     private String coverPath;
     private Long price;
     private Integer stock;

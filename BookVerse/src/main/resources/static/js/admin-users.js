@@ -14,7 +14,8 @@ async function loadUsersList() {
   tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">Đang tải danh sách...</td></tr>';
 
   try {
-    const users = await apiFetch('/api/admin/users');
+    const data = await apiFetch('/api/admin/users?page=0&size=200');
+    const users = Array.isArray(data) ? data : (data?.content || []);
 
     if (!users || users.length === 0) {
       tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">Chưa có tài khoản nào.</td></tr>';

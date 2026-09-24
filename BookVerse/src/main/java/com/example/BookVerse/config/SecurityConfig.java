@@ -61,6 +61,9 @@ public class SecurityConfig {
                 // Public: đăng ký / đăng nhập
                 .requestMatchers("/api/auth", "/api/auth/**").permitAll()
 
+                // Public: VNPay callback / return URL
+                .requestMatchers("/api/payments/vnpay-callback").permitAll()
+
                 // Public: đọc sách và ảnh bìa
                 .requestMatchers(HttpMethod.GET, "/api/books", "/api/books/**").permitAll()
 
@@ -79,11 +82,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT,    "/api/books", "/api/books/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/books", "/api/books/**").hasRole("ADMIN")
 
-                // Phase 2: USER endpoints — Wishlist, Cart, Order, Payment
+                // Phase 2: USER endpoints — Wishlist, Cart, Order, Payment, Notifications
                 .requestMatchers("/api/wishlist", "/api/wishlist/**").hasRole("USER")
                 .requestMatchers("/api/cart", "/api/cart/**").hasRole("USER")
                 .requestMatchers("/api/orders", "/api/orders/**").hasRole("USER")
                 .requestMatchers("/api/payments", "/api/payments/**").hasRole("USER")
+                .requestMatchers("/api/notifications", "/api/notifications/**").authenticated()
 
                 // Phase 3: ADMIN endpoints
                 .requestMatchers("/api/admin", "/api/admin/**").hasRole("ADMIN")

@@ -1,14 +1,29 @@
 package com.example.BookVerse.repository;
 
 import com.example.BookVerse.entity.Book;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
+
 import java.util.List;
+import java.util.Optional;
 
 public interface BookRepository extends JpaRepository<Book, String> {
+
+    /**
+     * Lay sach va khoa row voi PESSIMISTIC_WRITE trong transaction.
+     * Dung khi tru ton kho de tranh race condition (overselling).
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints(@QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000"))
+    @Query("SELECT b FROM Book b WHERE b.id = :id")
+    Optional<Book> findByIdWithPessimisticLock(@Param("id") String id);
 
     /**
      * Tim kiem nang cao: keyword (title/author/isbn), category, khoang gia, nam xb.
@@ -55,4 +70,11 @@ public interface BookRepository extends JpaRepository<Book, String> {
     /** Lay tat ca cac category duy nhat de hien thi bo loc */
     @Query("SELECT DISTINCT b.category FROM Book b WHERE b.category IS NOT NULL ORDER BY b.category")
     List<String> findAllCategories();
+
+    /**
+     * Lay sach co ton kho thap (stock <= threshold), sap xep tang dan theo stock.
+     * Dung query DB thay vi loadAll + filter Java.
+     */
+    @Query("SELECT b FROM Book b WHERE b.stock IS NOT NULL AND b.stock <= :threshold ORDER BY b.stock ASC")
+    Page<Book> findLowStockBooks(@Param("threshold") int threshold, Pageable pageable);
 }

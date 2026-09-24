@@ -61,7 +61,9 @@ async function loadLowStockBooks() {
 async function loadRecentOrders() {
   const tbody = document.getElementById('recent-orders-table-body');
   try {
-    const orders = await apiFetch('/api/admin/orders');
+    const data = await apiFetch('/api/admin/orders?page=0&size=5');
+    const orders = Array.isArray(data) ? data : (data?.content || []);
+
     if (!orders || orders.length === 0) {
       tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">Chưa có đơn hàng nào phát sinh.</td></tr>';
       return;

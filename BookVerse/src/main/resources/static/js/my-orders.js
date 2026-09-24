@@ -40,8 +40,7 @@ function renderOrderCard(order) {
   card.className = 'order-card';
 
   // Stepper Calculation
-  const steps = ['PENDING', 'PAID', 'PROCESSING', 'SHIPPING', 'DELIVERED'];
-  const currentIndex = steps.indexOf(order.status);
+  const isCOD = (order.payment?.method === 'COD');
   const isCancelled = order.status === 'CANCELLED';
 
   let stepperHtml = '';
@@ -52,7 +51,34 @@ function renderOrderCard(order) {
         Đơn hàng đã bị hủy.
       </div>
     `;
+  } else if (isCOD) {
+    // Đơn COD: 4 bước (Bỏ bước Thanh toán vì thanh toán khi giao thành công)
+    const codSteps = ['PENDING', 'PROCESSING', 'SHIPPING', 'DELIVERED'];
+    const codIndex = codSteps.indexOf(order.status);
+    stepperHtml = `
+      <div class="stepper">
+        <div class="step-item ${codIndex >= 0 ? (codIndex === 0 ? 'active' : 'completed') : ''}">
+          <div class="step-circle">${codIndex > 0 ? '✓' : '1'}</div>
+          <div class="step-title">Đặt hàng</div>
+        </div>
+        <div class="step-item ${codIndex >= 1 ? (codIndex === 1 ? 'active' : 'completed') : ''}">
+          <div class="step-circle">${codIndex > 1 ? '✓' : '2'}</div>
+          <div class="step-title">Đóng gói</div>
+        </div>
+        <div class="step-item ${codIndex >= 2 ? (codIndex === 2 ? 'active' : 'completed') : ''}">
+          <div class="step-circle">${codIndex > 2 ? '✓' : '3'}</div>
+          <div class="step-title">Đang giao</div>
+        </div>
+        <div class="step-item ${codIndex >= 3 ? 'completed' : ''}">
+          <div class="step-circle">${codIndex >= 3 ? '✓' : '4'}</div>
+          <div class="step-title">Thành công</div>
+        </div>
+      </div>
+    `;
   } else {
+    // Đơn VNPay / Online: 5 bước
+    const steps = ['PENDING', 'PAID', 'PROCESSING', 'SHIPPING', 'DELIVERED'];
+    const currentIndex = steps.indexOf(order.status);
     stepperHtml = `
       <div class="stepper">
         <div class="step-item ${currentIndex >= 0 ? (currentIndex === 0 ? 'active' : 'completed') : ''}">

@@ -23,11 +23,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final OrderRepository orderRepository;
-    private final CartRepository cartRepository;
-    private final BookRepository bookRepository;
-    private final UserRepository userRepository;
-    private final PaymentRepository paymentRepository;
+    private final OrderRepository     orderRepository;
+    private final CartRepository      cartRepository;
+    private final BookRepository      bookRepository;
+    private final UserRepository      userRepository;
+    private final PaymentRepository   paymentRepository;
+    private final NotificationService notificationService;
 
     /**
      * Checkout: Tạo Order từ giỏ hàng.
@@ -58,9 +59,9 @@ public class OrderService {
 
         long total = 0L;
 
-        // Tạo OrderItem và trừ tồn kho
+        // Tạo OrderItem và trừ tồn kho (dùng pessimistic lock để tránh overselling)
         for (CartItem cartItem : cart.getItems()) {
-            Book book = bookRepository.findById(cartItem.getBook().getId())
+            Book book = bookRepository.findByIdWithPessimisticLock(cartItem.getBook().getId())
                     .orElseThrow(() -> new AppException(ErrorCode.BOOK_NOT_FOUND));
 
             if (book.getStock() == null || book.getStock() < cartItem.getQuantity()) {
@@ -101,6 +102,9 @@ public class OrderService {
         // Xóa giỏ hàng sau khi đặt thành công
         cart.getItems().clear();
         cartRepository.save(cart);
+
+        // Gửi thông báo đặt hàng thành công cho khách hàng
+        notificationService.notifyOrderStatusChange(user, order.getId(), OrderStatus.PENDING, null);
 
         log.info("Checkout thanh cong. orderId={}, userId={}, total={}", order.getId(), userId, total);
 

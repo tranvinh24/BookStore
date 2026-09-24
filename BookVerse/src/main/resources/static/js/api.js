@@ -230,6 +230,7 @@ const ICONS = {
   search: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
   heart: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`,
   cart: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`,
+  bell: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`,
   user: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
   menu: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`,
   bookLogo: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`
@@ -309,6 +310,41 @@ function renderNavbar() {
           </div>
         </a>
 
+        <!-- Notifications -->
+        ${authenticated ? `
+          <div class="user-dropdown" id="notify-dropdown-container">
+            <div class="header-action-item" id="nav-notify-btn" title="Thông báo đơn hàng" style="cursor: pointer;">
+              <div class="action-icon-circle">
+                ${ICONS.bell}
+                <span id="nav-notify-count" class="action-badge" style="display:none; background: #EF4444;">0</span>
+              </div>
+              <div class="action-text">
+                <span class="action-text-top">Thông</span>
+                <span class="action-text-bottom">báo</span>
+              </div>
+            </div>
+            
+            <div class="dropdown-menu notify-dropdown-menu" id="nav-notify-dropdown">
+              <div class="notify-header">
+                <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Thông báo đơn hàng</div>
+                <button id="btn-mark-all-read" style="font-size: 0.78rem; color: var(--primary); background: none; border: none; cursor: pointer; padding: 2px 4px; font-weight: 600;">
+                  Đã đọc tất cả
+                </button>
+              </div>
+              <div id="notify-list" class="notify-list-wrap">
+                <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+                  Đang tải thông báo...
+                </div>
+              </div>
+              <div class="notify-footer">
+                <a href="/my-orders.html" style="font-size: 0.82rem; color: var(--primary); font-weight: 600; text-decoration: none;">
+                  Xem tất cả đơn mua →
+                </a>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
         <!-- User Dropdown -->
         ${authenticated ? `
           <div class="user-dropdown">
@@ -369,12 +405,14 @@ function renderNavbar() {
     </div>
   `;
 
-  // Dropdown toggle logic
+  // User Dropdown toggle logic
   const menuBtn = document.getElementById('user-menu-btn');
   const dropdown = document.getElementById('user-menu-dropdown');
   if (menuBtn && dropdown) {
     menuBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      const notifyDrop = document.getElementById('nav-notify-dropdown');
+      if (notifyDrop) notifyDrop.classList.remove('show');
       dropdown.classList.toggle('show');
     });
     document.addEventListener('click', () => {
@@ -382,10 +420,110 @@ function renderNavbar() {
     });
   }
 
+  // Notify Dropdown toggle logic
+  const notifyBtn = document.getElementById('nav-notify-btn');
+  const notifyDropdown = document.getElementById('nav-notify-dropdown');
+  if (notifyBtn && notifyDropdown) {
+    notifyBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (dropdown) dropdown.classList.remove('show');
+      const isShowing = notifyDropdown.classList.toggle('show');
+      if (isShowing) {
+        loadNotificationsList();
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (!notifyDropdown.contains(e.target) && e.target !== notifyBtn) {
+        notifyDropdown.classList.remove('show');
+      }
+    });
+  }
+
+  const btnMarkAll = document.getElementById('btn-mark-all-read');
+  if (btnMarkAll) {
+    btnMarkAll.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await markAllNotificationsAsRead();
+    });
+  }
+
   loadNavbarCategories();
 
   if (authenticated) {
     updateBadges();
+  }
+}
+
+async function loadNotificationsList() {
+  const container = document.getElementById('notify-list');
+  if (!container) return;
+
+  try {
+    const list = await apiFetch('/api/notifications');
+    if (!list || list.length === 0) {
+      container.innerHTML = `
+        <div style="padding: 2.5rem 1rem; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 0.5rem auto; opacity: 0.45;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <div>Chưa có thông báo đơn hàng nào</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = '';
+    list.forEach(item => {
+      const el = document.createElement('div');
+      el.className = `notify-item ${item.isRead ? '' : 'unread'}`;
+      el.innerHTML = `
+        <div class="notify-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+        </div>
+        <div class="notify-content">
+          <div class="notify-title">${escapeHtml(item.title)}</div>
+          <div class="notify-msg">${escapeHtml(item.message)}</div>
+          <div class="notify-time">
+            <span>⏱</span>
+            <span>${item.timeAgo || ''}</span>
+          </div>
+        </div>
+        ${!item.isRead ? '<div class="notify-unread-dot" title="Chưa đọc"></div>' : ''}
+      `;
+
+      el.addEventListener('click', async () => {
+        if (!item.isRead) {
+          apiFetch(`/api/notifications/${item.id}/read`, { method: 'PUT' }).catch(() => {});
+          item.isRead = true;
+          el.classList.remove('unread');
+          const dot = el.querySelector('.notify-unread-dot');
+          if (dot) dot.remove();
+          updateBadges();
+        }
+        if (item.orderId) {
+          window.location.href = `/my-orders.html`;
+        }
+      });
+
+      container.appendChild(el);
+    });
+
+  } catch (err) {
+    container.innerHTML = `<div style="padding: 1.5rem; text-align: center; color: var(--ribbon-coral); font-size: 0.85rem;">Không thể tải thông báo</div>`;
+  }
+}
+
+async function markAllNotificationsAsRead() {
+  try {
+    await apiFetch('/api/notifications/read-all', { method: 'PUT' });
+    document.querySelectorAll('.notify-item.unread').forEach(el => {
+      el.classList.remove('unread');
+      const dot = el.querySelector('.notify-unread-dot');
+      if (dot) dot.remove();
+    });
+    const notifyBadge = document.getElementById('nav-notify-count');
+    if (notifyBadge) notifyBadge.style.display = 'none';
+    showToast('Đã đánh dấu tất cả thông báo là đã đọc', 'info');
+  } catch (e) {
+    showToast('Không thể cập nhật trạng thái thông báo', 'error');
   }
 }
 
@@ -408,9 +546,10 @@ async function loadNavbarCategories() {
 
 async function updateBadges() {
   try {
-    const [cart, wishlist] = await Promise.all([
+    const [cart, wishlist, notifyCount] = await Promise.all([
       apiFetch('/api/cart').catch(() => null),
-      apiFetch('/api/wishlist').catch(() => null)
+      apiFetch('/api/wishlist').catch(() => null),
+      apiFetch('/api/notifications/unread-count').catch(() => null)
     ]);
 
     const cartBadge = document.getElementById('nav-cart-count');
@@ -425,6 +564,17 @@ async function updateBadges() {
     if (wishBadge && wishlist && wishlist.length > 0) {
       wishBadge.textContent = wishlist.length;
       wishBadge.style.display = 'flex';
+    }
+
+    const notifyBadge = document.getElementById('nav-notify-count');
+    if (notifyBadge) {
+      const count = notifyCount?.unreadCount || 0;
+      if (count > 0) {
+        notifyBadge.textContent = count > 99 ? '99+' : count;
+        notifyBadge.style.display = 'flex';
+      } else {
+        notifyBadge.style.display = 'none';
+      }
     }
   } catch (e) { }
 }

@@ -5,6 +5,7 @@ import com.example.BookVerse.dto.request.UpdateOrderStatusRequest;
 import com.example.BookVerse.dto.request.UpdateStockRequest;
 import com.example.BookVerse.dto.response.BookRespone;
 import com.example.BookVerse.dto.response.OrderSummaryResponse;
+import com.example.BookVerse.dto.response.PageResponse;
 import com.example.BookVerse.dto.response.RevenueResponse;
 import com.example.BookVerse.dto.response.UserResponse;
 import com.example.BookVerse.enums.OrderStatus;
@@ -36,17 +37,18 @@ public class AdminController {
     // =========================================================
 
     /**
-     * GET /api/admin/orders
-     * Lay toan bo don hang, sap xep moi nhat truoc.
-     * Co the loc theo trang thai: ?status=PENDING
+     * GET /api/admin/orders?page=0&size=20&status=PENDING
+     * Lay danh sach don hang co phan trang va loc theo trang thai.
      */
     @GetMapping("/orders")
-    public List<OrderSummaryResponse> getAllOrders(
-            @RequestParam(required = false) OrderStatus status) {
+    public PageResponse<OrderSummaryResponse> getAllOrders(
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "20") int size) {
         if (status != null) {
-            return adminService.getOrdersByStatus(status);
+            return adminService.getOrdersByStatus(status, page, size);
         }
-        return adminService.getAllOrders();
+        return adminService.getAllOrders(page, size);
     }
 
     /**
@@ -75,12 +77,14 @@ public class AdminController {
     // =========================================================
 
     /**
-     * GET /api/admin/users
-     * Lay danh sach tat ca nguoi dung.
+     * GET /api/admin/users?page=0&size=20
+     * Lay danh sach tat ca nguoi dung voi phan trang.
      */
     @GetMapping("/users")
-    public List<UserResponse> getAllUsers() {
-        return adminService.getAllUsers();
+    public PageResponse<UserResponse> getAllUsers(
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return adminService.getAllUsers(page, size);
     }
 
     /**

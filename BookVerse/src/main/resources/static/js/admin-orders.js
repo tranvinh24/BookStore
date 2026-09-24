@@ -17,10 +17,11 @@ async function loadOrders() {
 
   try {
     const endpoint = currentFilterStatus 
-      ? `/api/admin/orders?status=${currentFilterStatus}`
-      : '/api/admin/orders';
+      ? `/api/admin/orders?status=${currentFilterStatus}&page=0&size=200`
+      : '/api/admin/orders?page=0&size=200';
 
-    const orders = await apiFetch(endpoint);
+    const data = await apiFetch(endpoint);
+    const orders = Array.isArray(data) ? data : (data?.content || []);
 
     if (!orders || orders.length === 0) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">Không có đơn hàng nào phù hợp bộ lọc.</td></tr>';
@@ -29,9 +30,10 @@ async function loadOrders() {
 
     tbody.innerHTML = '';
     orders.forEach(o => {
+      const displayId = o.id ? (o.id.length > 8 ? o.id.substring(0, 8) + '...' : o.id) : '—';
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td class="font-number" style="font-weight: 600; font-size: 0.85rem;">${o.id.substring(0, 8)}...</td>
+        <td class="font-number" style="font-weight: 600; font-size: 0.85rem;" title="${o.id || ''}">${displayId}</td>
         <td>
           <div style="font-weight: 600; color: var(--ink);">${o.userName || 'Ẩn danh'}</div>
           <div style="font-size: 0.78rem; color: var(--ink-muted);">${o.itemCount || 1} sản phẩm</div>
@@ -49,6 +51,7 @@ async function loadOrders() {
           <button class="btn btn-primary btn-sm btn-update-status" 
                   data-id="${o.id}" 
                   data-status="${o.status}" 
+                  data-method="${o.paymentMethod || 'COD'}"
                   data-note="${o.trackingNote || ''}"
                   ${o.status === 'DELIVERED' || o.status === 'CANCELLED' ? 'disabled' : ''}>
             Xử lý
@@ -61,7 +64,7 @@ async function loadOrders() {
     // Bind Update Status Button
     document.querySelectorAll('.btn-update-status').forEach(btn => {
       btn.addEventListener('click', () => {
-        openStatusModal(btn.dataset.id, btn.dataset.status, btn.dataset.note);
+        openStatusModal(btn.dataset.id, btn.dataset.status, btn.dataset.note, btn.dataset.method);
       });
     });
 
@@ -70,7 +73,7 @@ async function loadOrders() {
   }
 }
 
-function openStatusModal(orderId, currentStatus, note) {
+function openStatusModal(orderId, currentStatus, note, method) {
   document.getElementById('status-order-id').value = orderId;
   document.getElementById('status-order-id-label').textContent = orderId;
   document.getElementById('input-tracking-note').value = note || '';
@@ -78,7 +81,9 @@ function openStatusModal(orderId, currentStatus, note) {
 
   // Pre-select next logical status
   const select = document.getElementById('select-next-status');
-  if (currentStatus === 'PENDING') select.value = 'PAID';
+  if (currentStatus === 'PENDING') {
+    select.value = (method === 'COD') ? 'PROCESSING' : 'PAID';
+  }
   else if (currentStatus === 'PAID') select.value = 'PROCESSING';
   else if (currentStatus === 'PROCESSING') select.value = 'SHIPPING';
   else if (currentStatus === 'SHIPPING') select.value = 'DELIVERED';

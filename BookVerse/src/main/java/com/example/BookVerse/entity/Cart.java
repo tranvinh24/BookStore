@@ -7,7 +7,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "cart")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
+@ToString(exclude = {"user", "items"})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

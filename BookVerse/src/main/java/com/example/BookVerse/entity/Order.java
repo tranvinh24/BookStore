@@ -9,7 +9,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "orders")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
+@ToString(exclude = {"user", "items", "payment"})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
