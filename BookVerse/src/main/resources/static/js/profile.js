@@ -73,12 +73,13 @@ function renderAvatar(avatarPath, displayName) {
     initialEl.style.display = 'flex';
   };
 
-  // Chỉ dùng avatarPath nếu là URL tĩnh hợp lệ (bắt đầu bằng '/')
-  // Path cũ dạng "2026/09/..." trong DB sẽ bị bỏ qua
-  const validPath = avatarPath && avatarPath.startsWith('/');
+  // Hỗ trợ cả URL tĩnh local (/uploads/...) và URL Cloudinary (http://, https://)
+  const validPath = avatarPath && (avatarPath.startsWith('/') || avatarPath.startsWith('http'));
 
   if (validPath) {
-    const url = avatarPath + '?t=' + Date.now();
+    const url = avatarPath.startsWith('http')
+      ? (avatarPath.includes('?') ? avatarPath + '&t=' + Date.now() : avatarPath + '?t=' + Date.now())
+      : (avatarPath + '?t=' + Date.now());
 
     sidebarImg.onerror = () => fallback(sidebarImg, sidebarInitial);
     sidebarImg.src = url;
@@ -108,10 +109,12 @@ function updateNavbarAvatar(user) {
   if (!circle) return;
 
   const initial = (user.userName || 'U').charAt(0).toUpperCase();
-  const validPath = user.avatarPath && user.avatarPath.startsWith('/');
+  const validPath = user.avatarPath && (user.avatarPath.startsWith('/') || user.avatarPath.startsWith('http'));
 
   if (validPath) {
-    const url = user.avatarPath + '?t=' + Date.now();
+    const url = user.avatarPath.startsWith('http')
+      ? (user.avatarPath.includes('?') ? user.avatarPath + '&t=' + Date.now() : user.avatarPath + '?t=' + Date.now())
+      : (user.avatarPath + '?t=' + Date.now());
     const img = document.createElement('img');
     img.src = url;
     img.alt = 'avatar';

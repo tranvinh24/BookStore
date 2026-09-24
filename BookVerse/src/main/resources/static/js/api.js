@@ -611,9 +611,11 @@ async function updateNavbarAvatarFromProfile() {
     const circle = document.querySelector('#user-menu-btn .action-icon-circle');
     if (!circle) return;
 
-    // Cập nhật avatar nếu có avatarPath hợp lệ
-    if (profile.avatarPath && profile.avatarPath.startsWith('/')) {
-      const url = profile.avatarPath + '?t=' + Date.now();
+    // Cập nhật avatar nếu có avatarPath hợp lệ (hỗ trợ cả Cloudinary URL và local path)
+    if (profile.avatarPath && (profile.avatarPath.startsWith('/') || profile.avatarPath.startsWith('http'))) {
+      const url = profile.avatarPath.startsWith('http')
+        ? (profile.avatarPath.includes('?') ? profile.avatarPath + '&t=' + Date.now() : profile.avatarPath + '?t=' + Date.now())
+        : (profile.avatarPath + '?t=' + Date.now());
       const img = document.createElement('img');
       img.src = url;
       img.alt = 'avatar';
