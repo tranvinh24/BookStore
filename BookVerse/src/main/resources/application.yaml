@@ -43,3 +43,12 @@ vnpay:
   hash-secret: ${VNPAY_HASH_SECRET:EJLIBJTMOLGURBAJNAYYYANBRIQITFFU}
   pay-url: ${VNPAY_PAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
   return-url: ${VNPAY_RETURN_URL:http://localhost:8080/payment.html}
+
+# Cấu hình Swagger / OpenAPI Documentation
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha

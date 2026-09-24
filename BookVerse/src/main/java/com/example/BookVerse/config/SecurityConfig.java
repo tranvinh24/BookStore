@@ -67,10 +67,11 @@ public class SecurityConfig {
                 // Public: đọc sách và ảnh bìa
                 .requestMatchers(HttpMethod.GET, "/api/books", "/api/books/**").permitAll()
 
-                // Public: các file tĩnh (HTML/JS/CSS)
+                // Public: các file tĩnh (HTML/JS/CSS) và Swagger UI / OpenAPI docs
                 .requestMatchers(
                     "/", "/*.html", "/admin/**",
-                    "/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico"
+                    "/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico",
+                    "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
                 ).permitAll()
 
                 // Reviews: người dùng đã đăng nhập có thể viết bình luận hoặc xóa bình luận của mình
